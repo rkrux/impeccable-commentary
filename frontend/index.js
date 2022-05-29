@@ -82,7 +82,7 @@ const state = {
     error: null,
   },
 };
-const updateState = (stateType, action) => {
+const getStateUpdaterByStateType = (stateType) => (action) => {
   const { type, payload } = action;
   switch (type) {
     case ASYNC_STATES.LOADING:
@@ -97,6 +97,8 @@ const updateState = (stateType, action) => {
       state[stateType].error = payload;
   }
 };
+const updateCommentListState = getStateUpdaterByStateType("commentList");
+const updateCommentSubmitState = getStateUpdaterByStateType("commentSubmit");
 
 // DOM Nodes
 const D = document;
@@ -108,6 +110,11 @@ const $commentListError = D.querySelector("#commentListError");
 const $commentSubmitMessage = D.querySelector("#commentSubmitMessage");
 
 // DOM Manipulation
+const buildCommentListLoader = () => {
+  $commentLoader.textContent = "Loading comments...";
+  $commentListError.classList.add("hidden");
+  $commentLoader.classList.remove("hidden");
+};
 const buildComment = (comment) => {
   const { commentId, commentText, userName, createdAt, upvotes } = comment;
   const $comment = D.createElement("div");
@@ -136,28 +143,32 @@ const buildCommentList = (comments) => {
   comments.forEach((comment) => {
     $commentList.appendChild(buildComment(comment));
   });
+  $commentLoader.classList.add("hidden");
+  $commentList.classList.remove("hidden");
 };
-const buildCommentListError = () => {
-  $commentListError.appendChild(D.createTextNode(state.commentList.error));
+const buildCommentListError = (error) => {
+  $commentListError.appendChild(D.createTextNode(error));
+  $commentLoader.classList.add("hidden");
+  $commentListError.classList.remove("hidden");
 };
 const updateCommentListView = (action) => {
   const { type } = action;
   switch (type) {
     case ASYNC_STATES.LOADING:
       // $commentList.classList.add("hidden");
-      $commentListError.classList.add("hidden");
-      $commentLoader.classList.remove("hidden");
+      buildCommentListLoader();
       break;
     case ASYNC_STATES.DATA:
       buildCommentList(state.commentList.data);
-      $commentLoader.classList.add("hidden");
-      $commentList.classList.remove("hidden");
       break;
     case ASYNC_STATES.ERROR:
-      buildCommentListError();
-      $commentLoader.classList.add("hidden");
-      $commentListError.classList.remove("hidden");
+      buildCommentListError(state.commentList.error);
+      break;
   }
+};
+
+const buildCommentSubmitLoader = () => {
+  $commentSubmit.textContent = "Submitting...";
 };
 const buildCommentSubmitMessage = (message, className) => {
   $commentSubmit.textContent = "Comment";
@@ -173,7 +184,7 @@ const updateCommentSubmitView = (action) => {
   const { type } = action;
   switch (type) {
     case ASYNC_STATES.LOADING:
-      $commentSubmit.textContent = "Submitting...";
+      buildCommentSubmitLoader();
       break;
     case ASYNC_STATES.DATA:
       buildCommentSubmitMessage(state.commentSubmit.data, "success");
@@ -181,14 +192,14 @@ const updateCommentSubmitView = (action) => {
       break;
     case ASYNC_STATES.ERROR:
       buildCommentSubmitMessage(state.commentSubmit.error, "error");
-      $commentLoader.classList.add("hidden");
+      break;
   }
 };
 
 // Dynamic Flow
 const loadCommentList = async () => {
   const update = (action) => {
-    updateState("commentList", action);
+    updateCommentListState(action);
     updateCommentListView(action);
   };
 
@@ -202,7 +213,7 @@ const loadCommentList = async () => {
 };
 const submitComment = async () => {
   const update = (action) => {
-    updateState("commentSubmit", action);
+    updateCommentSubmitState(action);
     updateCommentSubmitView(action);
   };
 
