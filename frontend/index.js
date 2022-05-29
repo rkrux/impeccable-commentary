@@ -1,5 +1,4 @@
 // TODOs:
-// Improve commentary alignment
 // Comment submit loader
 // Comment input validation along with error styling
 // Input val will include data sanitization?
@@ -49,7 +48,7 @@ const submitCommentToAPI = async (commentData) => {
   return new Promise((resolve, reject) => {
     const randomMs = getRandomNumber(1000);
     setTimeout(() => {
-      if (randomMs < 9) {
+      if (randomMs < API_TIMEOUT_MS) {
         storedComments = [commentData, ...storedComments]; // Add comment on top
         resolve("Submitted");
       } else {
@@ -60,29 +59,29 @@ const submitCommentToAPI = async (commentData) => {
 };
 
 // Application Data
-let state = {
+let commentListState = {
   loading: false,
   data: null,
   error: null,
 };
-const VIEW = {
+const COMMENT_LIST_VIEW = {
   LOADING: 0,
   DATA: 1,
   ERROR: 2,
 };
-const updateState = (action) => {
+const updateCommentListState = (action) => {
   const { type, payload } = action;
   switch (type) {
-    case VIEW.LOADING:
-      state.loading = true;
+    case COMMENT_LIST_VIEW.LOADING:
+      commentListState.loading = true;
       break;
-    case VIEW.DATA:
-      state.data = payload;
-      state.error = null;
+    case COMMENT_LIST_VIEW.DATA:
+      commentListState.data = payload;
+      commentListState.error = null;
       break;
-    case VIEW.ERROR:
-      state.data = null;
-      state.error = payload;
+    case COMMENT_LIST_VIEW.ERROR:
+      commentListState.data = null;
+      commentListState.error = payload;
   }
 };
 
@@ -126,22 +125,22 @@ const buildCommentList = (comments) => {
   });
 };
 const buildCommentListError = () => {
-  $commentListError.appendChild(D.createTextNode(state.error));
+  $commentListError.appendChild(D.createTextNode(commentListState.error));
 };
-const updateView = (action) => {
+const updateCommentListView = (action) => {
   const { type } = action;
   switch (type) {
-    case VIEW.LOADING:
+    case COMMENT_LIST_VIEW.LOADING:
       // $commentList.classList.add("hidden");
       $commentListError.classList.add("hidden");
       $commentLoader.classList.remove("hidden");
       break;
-    case VIEW.DATA:
-      buildCommentList(state.data);
+    case COMMENT_LIST_VIEW.DATA:
+      buildCommentList(commentListState.data);
       $commentLoader.classList.add("hidden");
       $commentList.classList.remove("hidden");
       break;
-    case VIEW.ERROR:
+    case COMMENT_LIST_VIEW.ERROR:
       buildCommentListError();
       $commentLoader.classList.add("hidden");
       $commentListError.classList.remove("hidden");
@@ -149,18 +148,18 @@ const updateView = (action) => {
 };
 
 // Dynamic Flow
-const loadComments = async () => {
+const loadCommentList = async () => {
   const update = (action) => {
-    updateState(action);
-    updateView(action);
+    updateCommentListState(action);
+    updateCommentListView(action);
   };
 
-  update({ type: VIEW.LOADING });
+  update({ type: COMMENT_LIST_VIEW.LOADING });
   try {
     const comments = await fetchCommentsFromAPI();
-    update({ type: VIEW.DATA, payload: comments });
+    update({ type: COMMENT_LIST_VIEW.DATA, payload: comments });
   } catch (error) {
-    update({ type: VIEW.ERROR, payload: error });
+    update({ type: COMMENT_LIST_VIEW.ERROR, payload: error });
   }
 };
 const submitComment = async () => {
@@ -171,7 +170,7 @@ const submitComment = async () => {
       createdAt: Date.now(),
       text: $commentInput.value,
     });
-    loadComments();
+    loadCommentList();
   } catch (error) {
     $commentSubmitError.classList.remove("hidden");
     $commentSubmitError.innerHTML = "";
@@ -184,4 +183,4 @@ const submitComment = async () => {
 
 // App initialization
 $commentSubmit.onclick = submitComment;
-loadComments();
+loadCommentList();
