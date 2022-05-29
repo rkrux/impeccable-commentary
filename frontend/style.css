@@ -1,0 +1,80 @@
+.hidden {
+  display: none;
+}
+
+#commentary {
+  width: 50vw;
+  padding: 10px;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+}
+
+.displayPicture {
+  border: 1px solid black;
+  border-radius: 50%;
+  background-color: papayawhip;
+  height: 30px;
+  width: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#commentInputContainer {
+  display: flex;
+}
+
+.commentInputActionContainer {
+  display: flex;
+  flex: auto;
+  padding-left: 10px;
+}
+
+#commentInput {
+  flex: auto;
+  margin-right: 10px;
+  border-style: solid;
+  border-color: lightgray;
+  border-radius: 4px;
+}
+
+#commentSubmit {
+  background-color: blueviolet;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding-left: 10px;
+  padding-right: 10px;
+  cursor: pointer;
+}
+
+#commentInputAndListDivider {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.commentContainer {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.commentDetails {
+  padding-left: 10px;
+}
+
+.commentUser {
+  font-weight: 700;
+}
+
+.commentCreatedAt {
+  font-weight: 100;
+}
+
+.commentAction {
+  background-color: transparent;
+  color: darkblue;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Swaggy Commentary</title>
+    <link rel="stylesheet" href="style.css" />
+    <script defer src="index.js"></script>
+  </head>
+  <body>
+    <div id="commentary">
+      <h3>Discussion</h3>
+      <div id="commentInputContainer">
+        <div class="displayPictureContainer">
+          <div class="displayPicture">A</div>
+        </div>
+        <div class="commentInputActionContainer">
+          <input
+            type="text"
+            placeholder="What are your thoughts?"
+            id="commentInput"
+          />
+          <button id="commentSubmit">Comment</button>
+        </div>
+      </div>
+      <hr id="commentInputAndListDivider" />
+      <div id="commentLoader" class="hidden">Loading comments...</div>
+      <div id="commentList" class="hidden"></div>
+      <div id="commentError" class="hidden"></div>
+    </div>
+  </body>
+</html>
