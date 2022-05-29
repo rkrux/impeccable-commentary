@@ -1,17 +1,27 @@
+// TODOs:
+// Improve commentary alignment
+// Comment submit loader
+// Build an error screen for comment submit
+// Slight error handler for upvote failure
+// Handle upvoting with mock api
+// Comment time formatter
+// User Randomizer
+// Remove Mock APIs
+
 // Constants and Helpers
-const currentTime = Date.now();
-const storedComments = [
+const API_TIMEOUT_MS = 980;
+let storedComments = [
   {
     id: 1,
     userName: "Rob Hope",
-    createdAt: "45 min ago",
+    createdAt: Date.now(),
     text: "Now that's a huge release with some big community earnings back to it - it must be so\
      rewarding seeing creators quit their day jobs after monetizing (with real MRR) on the new platform.",
   },
   {
     id: 2,
     userName: "Cameron Lawrence",
-    createdAt: "3 weeks ago",
+    createdAt: Date.now(),
     text: "Love the native memberships and the zipless themes, I was just asked by a friend about options\
         for a new site, and I think I know what I will be recommending then...",
   },
@@ -23,7 +33,7 @@ const fetchCommentsFromAPI = async () => {
   return new Promise((resolve, reject) => {
     const randomMs = getRandomNumber(1000);
     setTimeout(() => {
-      if (randomMs < 970) {
+      if (randomMs < API_TIMEOUT_MS) {
         resolve(storedComments);
       } else {
         reject(`Unable to fetch comments from API, time: ${randomMs}ms`);
@@ -32,12 +42,11 @@ const fetchCommentsFromAPI = async () => {
   });
 };
 const submitCommentToAPI = async (commentData) => {
-  console.log("commentData: ", commentData);
   return new Promise((resolve, reject) => {
     const randomMs = getRandomNumber(1000);
     setTimeout(() => {
-      if (randomMs < 970) {
-        storedComments.push(commentData);
+      if (randomMs < API_TIMEOUT_MS) {
+        storedComments = [commentData, ...storedComments]; // Add comment on top
         resolve("Submitted");
       } else {
         reject(`Unable to submit comment to API, time: ${randomMs}ms`);
@@ -118,6 +127,8 @@ const updateView = (action) => {
   const { type } = action;
   switch (type) {
     case VIEW.LOADING:
+      $commentList.classList.add("hidden");
+      $commentError.classList.add("hidden");
       $commentLoader.classList.remove("hidden");
       break;
     case VIEW.DATA:
@@ -149,20 +160,17 @@ const loadComments = async () => {
 };
 const submitComment = async () => {
   try {
-    const result = await submitCommentToAPI({
+    await submitCommentToAPI({
       id: 3,
       userName: "Lashawn Williams",
       createdAt: Date.now(),
       text: $commentInput.value,
     });
-    console.log(result);
     loadComments();
   } catch (e) {
     console.log(e);
   }
 };
-
-// TODO: Build an error screen
 
 // App initialization
 $commentSubmit.onclick = submitComment;
