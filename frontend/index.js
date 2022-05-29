@@ -11,7 +11,12 @@
 
 // Constants and Helpers
 const API_TIMEOUT_MS = 980,
-  MESSAGE_TIMEOUT_MS = 5000;
+  MESSAGE_TIMEOUT_MS = 5000,
+  ASYNC_STATES = {
+    LOADING: 0,
+    DATA: 1,
+    ERROR: 2,
+  };
 let storedComments = [
   {
     commentId: 1,
@@ -65,54 +70,31 @@ const submitCommentToAPI = async (commentData) => {
 };
 
 // Application Data
-let commentListState = {
-  loading: false,
-  data: null,
-  error: null,
+const state = {
+  commentList: {
+    loading: false,
+    data: null,
+    error: null,
+  },
+  commentSubmit: {
+    loading: false,
+    data: null,
+    error: null,
+  },
 };
-const COMMENT_LIST_VIEW = {
-  LOADING: 0,
-  DATA: 1,
-  ERROR: 2,
-};
-const updateCommentListState = (action) => {
+const updateState = (stateType, action) => {
   const { type, payload } = action;
   switch (type) {
-    case COMMENT_LIST_VIEW.LOADING:
-      commentListState.loading = true;
+    case ASYNC_STATES.LOADING:
+      state[stateType].loading = true;
       break;
-    case COMMENT_LIST_VIEW.DATA:
-      commentListState.data = payload;
-      commentListState.error = null;
+    case ASYNC_STATES.DATA:
+      state[stateType].data = payload;
+      state[stateType].error = null;
       break;
-    case COMMENT_LIST_VIEW.ERROR:
-      commentListState.data = null;
-      commentListState.error = payload;
-  }
-};
-let commentSubmitState = {
-  loading: false,
-  data: null,
-  error: null,
-};
-const COMMENT_SUBMIT_VIEW = {
-  LOADING: 0,
-  DATA: 1,
-  ERROR: 2,
-};
-const updateCommentSubmitState = (action) => {
-  const { type, payload } = action;
-  switch (type) {
-    case COMMENT_SUBMIT_VIEW.LOADING:
-      commentSubmitState.loading = true;
-      break;
-    case COMMENT_SUBMIT_VIEW.DATA:
-      commentSubmitState.data = "Submitted comment";
-      commentSubmitState.error = null;
-      break;
-    case COMMENT_SUBMIT_VIEW.ERROR:
-      commentSubmitState.data = null;
-      commentSubmitState.error = payload;
+    case ASYNC_STATES.ERROR:
+      state[stateType].data = null;
+      state[stateType].error = payload;
   }
 };
 
@@ -156,22 +138,22 @@ const buildCommentList = (comments) => {
   });
 };
 const buildCommentListError = () => {
-  $commentListError.appendChild(D.createTextNode(commentListState.error));
+  $commentListError.appendChild(D.createTextNode(state.commentList.error));
 };
 const updateCommentListView = (action) => {
   const { type } = action;
   switch (type) {
-    case COMMENT_LIST_VIEW.LOADING:
+    case ASYNC_STATES.LOADING:
       // $commentList.classList.add("hidden");
       $commentListError.classList.add("hidden");
       $commentLoader.classList.remove("hidden");
       break;
-    case COMMENT_LIST_VIEW.DATA:
-      buildCommentList(commentListState.data);
+    case ASYNC_STATES.DATA:
+      buildCommentList(state.commentList.data);
       $commentLoader.classList.add("hidden");
       $commentList.classList.remove("hidden");
       break;
-    case COMMENT_LIST_VIEW.ERROR:
+    case ASYNC_STATES.ERROR:
       buildCommentListError();
       $commentLoader.classList.add("hidden");
       $commentListError.classList.remove("hidden");
@@ -190,15 +172,15 @@ const buildCommentSubmitMessage = (message, className) => {
 const updateCommentSubmitView = (action) => {
   const { type } = action;
   switch (type) {
-    case COMMENT_SUBMIT_VIEW.LOADING:
+    case ASYNC_STATES.LOADING:
       $commentSubmit.textContent = "Submitting...";
       break;
-    case COMMENT_SUBMIT_VIEW.DATA:
-      buildCommentSubmitMessage(commentSubmitState.data, "success");
+    case ASYNC_STATES.DATA:
+      buildCommentSubmitMessage(state.commentSubmit.data, "success");
       loadCommentList();
       break;
-    case COMMENT_SUBMIT_VIEW.ERROR:
-      buildCommentSubmitMessage(commentSubmitState.error, "error");
+    case ASYNC_STATES.ERROR:
+      buildCommentSubmitMessage(state.commentSubmit.error, "error");
       $commentLoader.classList.add("hidden");
   }
 };
@@ -206,34 +188,34 @@ const updateCommentSubmitView = (action) => {
 // Dynamic Flow
 const loadCommentList = async () => {
   const update = (action) => {
-    updateCommentListState(action);
+    updateState("commentList", action);
     updateCommentListView(action);
   };
 
-  update({ type: COMMENT_LIST_VIEW.LOADING });
+  update({ type: ASYNC_STATES.LOADING });
   try {
     const comments = await fetchCommentsFromAPI();
-    update({ type: COMMENT_LIST_VIEW.DATA, payload: comments });
+    update({ type: ASYNC_STATES.DATA, payload: comments });
   } catch (error) {
-    update({ type: COMMENT_LIST_VIEW.ERROR, payload: error });
+    update({ type: ASYNC_STATES.ERROR, payload: error });
   }
 };
 const submitComment = async () => {
   const update = (action) => {
-    updateCommentSubmitState(action);
+    updateState("commentSubmit", action);
     updateCommentSubmitView(action);
   };
 
-  update({ type: COMMENT_SUBMIT_VIEW.LOADING });
+  update({ type: ASYNC_STATES.LOADING });
   try {
     await submitCommentToAPI({
       userName: "Lashawn Williams",
       createdAt: Date.now(),
       commentText: $commentInput.value,
     });
-    update({ type: COMMENT_SUBMIT_VIEW.DATA });
+    update({ type: ASYNC_STATES.DATA, payload: "Submitted comment" });
   } catch (error) {
-    update({ type: COMMENT_SUBMIT_VIEW.ERROR, payload: error });
+    update({ type: ASYNC_STATES.ERROR, payload: error });
   }
 };
 
