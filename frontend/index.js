@@ -97,8 +97,6 @@ const getStateUpdaterByStateType = (stateType) => (action) => {
       state[stateType].error = payload;
   }
 };
-const updateCommentListState = getStateUpdaterByStateType("commentList");
-const updateCommentSubmitState = getStateUpdaterByStateType("commentSubmit");
 
 // DOM Nodes
 const D = document;
@@ -110,8 +108,13 @@ const $commentListError = D.querySelector("#commentListError");
 const $commentSubmitMessage = D.querySelector("#commentSubmitMessage");
 
 // DOM Manipulation
-const buildCommentListLoader = () => {
+const commentListLoadingView = () => {
   $commentLoader.textContent = "Loading comments...";
+  /*
+  By not hiding the exisitng list, user gets the chance to view the exisiting comments
+  instead of seeing only the loader - leads to better UX.
+  // $commentList.classList.add("hidden");
+  */
   $commentListError.classList.add("hidden");
   $commentLoader.classList.remove("hidden");
 };
@@ -138,7 +141,8 @@ const buildComment = (comment) => {
 
   return $comment;
 };
-const buildCommentList = (comments) => {
+const commentListDataView = () => {
+  const comments = state.commentList.data;
   $commentList.innerHTML = "";
   comments.forEach((comment) => {
     $commentList.appendChild(buildComment(comment));
@@ -146,52 +150,56 @@ const buildCommentList = (comments) => {
   $commentLoader.classList.add("hidden");
   $commentList.classList.remove("hidden");
 };
-const buildCommentListError = (error) => {
+const commentListErrorView = () => {
+  const error = state.commentList.error;
   $commentListError.appendChild(D.createTextNode(error));
   $commentLoader.classList.add("hidden");
   $commentListError.classList.remove("hidden");
 };
-const updateCommentListView = (action) => {
-  const { type } = action;
-  switch (type) {
-    case ASYNC_STATES.LOADING:
-      // $commentList.classList.add("hidden");
-      buildCommentListLoader();
-      break;
-    case ASYNC_STATES.DATA:
-      buildCommentList(state.commentList.data);
-      break;
-    case ASYNC_STATES.ERROR:
-      buildCommentListError(state.commentList.error);
-      break;
-  }
-};
-
-const buildCommentSubmitLoader = () => {
+const commentSubmitLoadingView = () => {
   $commentSubmit.textContent = "Submitting...";
 };
-const buildCommentSubmitMessage = (message, className) => {
+const buildCommentSubmitMessage = (asyncStateType, className) => () => {
+  const message = state.commentSubmit[asyncStateType];
   $commentSubmit.textContent = "Comment";
   $commentSubmitMessage.innerHTML = "";
   $commentSubmitMessage.classList.add(className);
   $commentSubmitMessage.appendChild(D.createTextNode(message));
   $commentSubmitMessage.classList.remove("hidden");
+
   setTimeout(() => {
     $commentSubmitMessage.classList.add("hidden");
   }, MESSAGE_TIMEOUT_MS);
 };
-const updateCommentSubmitView = (action) => {
+const commentSubmitDataView = function () {
+  buildCommentSubmitMessage("data", "success")();
+  loadCommentList();
+};
+const commentSubmitErrorView = buildCommentSubmitMessage("error", "error");
+
+const viewBuilders = {
+  commentList: {
+    loading: commentListLoadingView,
+    data: commentListDataView,
+    error: commentListErrorView,
+  },
+  commentSubmit: {
+    loading: commentSubmitLoadingView,
+    data: commentSubmitDataView,
+    error: commentSubmitErrorView,
+  },
+};
+const getViewBuilderByStateType = (stateType) => (action) => {
   const { type } = action;
   switch (type) {
     case ASYNC_STATES.LOADING:
-      buildCommentSubmitLoader();
+      viewBuilders[stateType].loading();
       break;
     case ASYNC_STATES.DATA:
-      buildCommentSubmitMessage(state.commentSubmit.data, "success");
-      loadCommentList();
+      viewBuilders[stateType].data();
       break;
     case ASYNC_STATES.ERROR:
-      buildCommentSubmitMessage(state.commentSubmit.error, "error");
+      viewBuilders[stateType].error();
       break;
   }
 };
@@ -199,8 +207,8 @@ const updateCommentSubmitView = (action) => {
 // Dynamic Flow
 const loadCommentList = async () => {
   const update = (action) => {
-    updateCommentListState(action);
-    updateCommentListView(action);
+    getStateUpdaterByStateType("commentList")(action);
+    getViewBuilderByStateType("commentList")(action);
   };
 
   update({ type: ASYNC_STATES.LOADING });
@@ -213,8 +221,8 @@ const loadCommentList = async () => {
 };
 const submitComment = async () => {
   const update = (action) => {
-    updateCommentSubmitState(action);
-    updateCommentSubmitView(action);
+    getStateUpdaterByStateType("commentSubmit")(action);
+    getViewBuilderByStateType("commentSubmit")(action);
   };
 
   update({ type: ASYNC_STATES.LOADING });
