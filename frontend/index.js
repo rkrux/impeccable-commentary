@@ -11,6 +11,7 @@
 
 // Constants and Helpers
 const API_TIMEOUT_MS = 980,
+  API_MAX_THRESHOLD_MS = 1000,
   MESSAGE_TIMEOUT_MS = 5000,
   ASYNC_STATES = {
     LOADING: 0,
@@ -18,15 +19,6 @@ const API_TIMEOUT_MS = 980,
     ERROR: 2,
   };
 let storedComments = [
-  {
-    commentId: 1,
-    userName: "Rob Hope",
-    createdAt: Date.now(),
-    commentText:
-      "Now that's a huge release with some big community earnings back to it - it must be so\
-     rewarding seeing creators quit their day jobs after monetizing (with real MRR) on the new platform.",
-    upvotes: 5,
-  },
   {
     commentId: 2,
     userName: "Cameron Lawrence",
@@ -36,11 +28,20 @@ let storedComments = [
         for a new site, and I think I know what I will be recommending then...",
     upvotes: 10,
   },
+  {
+    commentId: 1,
+    userName: "Rob Hope",
+    createdAt: Date.now(),
+    commentText:
+      "Now that's a huge release with some big community earnings back to it - it must be so\
+     rewarding seeing creators quit their day jobs after monetizing (with real MRR) on the new platform.",
+    upvotes: 5,
+  },
 ];
 const getRandomNumber = (maxValue) => {
   return Math.floor(Math.random() * maxValue);
 };
-const fetchCommentsFromAPI = async () => {
+const getCommentsFromAPI = async () => {
   return new Promise((resolve, reject) => {
     const randomMs = getRandomNumber(1000);
     setTimeout(() => {
@@ -52,16 +53,40 @@ const fetchCommentsFromAPI = async () => {
     }, randomMs);
   });
 };
-const submitCommentToAPI = async (commentData) => {
+const postCommentToAPI = async (commentData) => {
   return new Promise((resolve, reject) => {
-    const randomMs = getRandomNumber(1000);
+    const randomMs = getRandomNumber(API_MAX_THRESHOLD_MS);
     setTimeout(() => {
       if (randomMs < API_TIMEOUT_MS) {
         storedComments = [
-          { ...commentData, commentId: 3, upvotes: 0 },
+          {
+            ...commentData,
+            commentId: storedComments.length + 1,
+            upvotes: 0,
+            createdAt: Date.now(),
+          },
           ...storedComments,
         ];
         resolve("Submitted");
+      } else {
+        reject(`Unable to submit comment to API, time: ${randomMs}ms`);
+      }
+    }, randomMs);
+  });
+};
+const upvoteCommentToAPI = async ({ commentId, userId }) => {
+  return new Promise((resolve, reject) => {
+    const randomMs = getRandomNumber(API_MAX_THRESHOLD_MS);
+    setTimeout(() => {
+      if (randomMs < API_TIMEOUT_MS) {
+        let updatedUpvotes = 0;
+        storedComments
+          .filter((comment) => comment.commentId === commentId)
+          .forEach((commentToUpvote) => {
+            commentToUpvote.upvotes++;
+            updatedUpvotes = commentToUpvote.upvotes;
+          });
+        resolve({ updatedUpvotes });
       } else {
         reject(`Unable to submit comment to API, time: ${randomMs}ms`);
       }
@@ -108,6 +133,9 @@ const $commentListError = D.querySelector("#commentListError");
 const $commentSubmitMessage = D.querySelector("#commentSubmitMessage");
 
 // DOM Manipulation
+const upvoteHandler = (event, commentId) => {
+  console.log("upvoteHandler, event:", event, commentId);
+};
 const _buildComment = (comment) => {
   const { commentId, commentText, userName, createdAt, upvotes } = comment;
   const $comment = D.createElement("div");
@@ -123,8 +151,8 @@ const _buildComment = (comment) => {
                 <span class="commentCreatedAt">${createdAt}</span>
               </div>
               <p class="commentText">${commentText}</p>
-              <button class="commentAction">${upvotes} &#9650; Upvote</button>
-              <button class="commentAction">Reply</button>
+              <button class="commentAction" id="comment-${commentId}-upvote" onclick="upvoteHandler(event)">${upvotes} &#9650; Upvote</button>
+              <button class="commentAction" id="comment-${commentId}-reply">Reply</button>
           </div>
       </div>
     `;
@@ -217,7 +245,7 @@ const loadCommentList = async () => {
 
   update({ type: ASYNC_STATES.LOADING });
   try {
-    const comments = await fetchCommentsFromAPI();
+    const comments = await getCommentsFromAPI();
     update({ type: ASYNC_STATES.DATA, payload: comments });
   } catch (error) {
     update({ type: ASYNC_STATES.ERROR, payload: error });
@@ -231,9 +259,8 @@ const submitComment = async () => {
 
   update({ type: ASYNC_STATES.LOADING });
   try {
-    await submitCommentToAPI({
+    await postCommentToAPI({
       userName: "Lashawn Williams",
-      createdAt: Date.now(),
       commentText: $commentInput.value,
     });
     update({ type: ASYNC_STATES.DATA, payload: "Submitted comment" });
