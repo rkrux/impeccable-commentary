@@ -108,7 +108,30 @@ const $commentListError = D.querySelector("#commentListError");
 const $commentSubmitMessage = D.querySelector("#commentSubmitMessage");
 
 // DOM Manipulation
-const commentListLoadingView = () => {
+const _buildComment = (comment) => {
+  const { commentId, commentText, userName, createdAt, upvotes } = comment;
+  const $comment = D.createElement("div");
+  $comment.innerHTML = `
+      <div id="comment-${commentId}" class="commentContainer">
+            <div class="displayPictureContainer">
+              <div class="displayPicture">${userName.charAt(0) ?? ""}</div>
+            </div>
+            <div class="commentDetails">
+              <div class="commentHeading">
+                <span class="commentUser">${userName}</span>
+                <span>&#183;</span>
+                <span class="commentCreatedAt">${createdAt}</span>
+              </div>
+              <p class="commentText">${commentText}</p>
+              <button class="commentAction">${upvotes} &#9650; Upvote</button>
+              <button class="commentAction">Reply</button>
+          </div>
+      </div>
+    `;
+
+  return $comment;
+};
+const stateCommentListLoadingView = () => {
   $commentLoader.textContent = "Loading comments...";
   /*
   By not hiding the exisitng list, user gets the chance to view the exisiting comments
@@ -118,48 +141,23 @@ const commentListLoadingView = () => {
   $commentListError.classList.add("hidden");
   $commentLoader.classList.remove("hidden");
 };
-const buildComment = (comment) => {
-  const { commentId, commentText, userName, createdAt, upvotes } = comment;
-  const $comment = D.createElement("div");
-  $comment.innerHTML = `
-    <div id="comment-${commentId}" class="commentContainer">
-          <div class="displayPictureContainer">
-            <div class="displayPicture">${userName.charAt(0) ?? ""}</div>
-          </div>
-          <div class="commentDetails">
-            <div class="commentHeading">
-              <span class="commentUser">${userName}</span>
-              <span>&#183;</span>
-              <span class="commentCreatedAt">${createdAt}</span>
-            </div>
-            <p class="commentText">${commentText}</p>
-            <button class="commentAction">${upvotes} &#9650; Upvote</button>
-            <button class="commentAction">Reply</button>
-        </div>
-    </div>
-  `;
-
-  return $comment;
-};
-const commentListDataView = () => {
+const stateCommentListSuccessView = () => {
   const comments = state.commentList.data;
   $commentList.innerHTML = "";
   comments.forEach((comment) => {
-    $commentList.appendChild(buildComment(comment));
+    $commentList.appendChild(_buildComment(comment));
   });
   $commentLoader.classList.add("hidden");
   $commentList.classList.remove("hidden");
 };
-const commentListErrorView = () => {
+const stateCommentListErrorView = () => {
   const error = state.commentList.error;
   $commentListError.appendChild(D.createTextNode(error));
   $commentLoader.classList.add("hidden");
   $commentListError.classList.remove("hidden");
 };
-const commentSubmitLoadingView = () => {
-  $commentSubmit.textContent = "Submitting...";
-};
-const buildCommentSubmitMessage = (asyncStateType, className) => () => {
+
+const _buildCommentSubmitMessage = (asyncStateType, className) => () => {
   const message = state.commentSubmit[asyncStateType];
   $commentSubmit.textContent = "Comment";
   $commentSubmitMessage.innerHTML = "";
@@ -171,22 +169,28 @@ const buildCommentSubmitMessage = (asyncStateType, className) => () => {
     $commentSubmitMessage.classList.add("hidden");
   }, MESSAGE_TIMEOUT_MS);
 };
-const commentSubmitDataView = function () {
-  buildCommentSubmitMessage("data", "success")();
+const stateCommentSubmitLoadingView = () => {
+  $commentSubmit.textContent = "Submitting...";
+};
+const stateCommentSubmitSuccessView = function () {
+  _buildCommentSubmitMessage("data", "success")();
   loadCommentList();
 };
-const commentSubmitErrorView = buildCommentSubmitMessage("error", "error");
+const stateCommentSubmitErrorView = _buildCommentSubmitMessage(
+  "error",
+  "error"
+);
 
 const viewBuilders = {
   commentList: {
-    loading: commentListLoadingView,
-    data: commentListDataView,
-    error: commentListErrorView,
+    loading: stateCommentListLoadingView,
+    data: stateCommentListSuccessView,
+    error: stateCommentListErrorView,
   },
   commentSubmit: {
-    loading: commentSubmitLoadingView,
-    data: commentSubmitDataView,
-    error: commentSubmitErrorView,
+    loading: stateCommentSubmitLoadingView,
+    data: stateCommentSubmitSuccessView,
+    error: stateCommentSubmitErrorView,
   },
 };
 const getViewBuilderByStateType = (stateType) => (action) => {
