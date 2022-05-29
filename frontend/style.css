@@ -3,9 +3,11 @@
 }
 
 #commentary {
-  width: 50vw;
-  padding: 10px;
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  width: 50vw;
+  padding-top: 10px;
+  position: absolute;
+  left: 25%;
 }
 
 .displayPicture {
@@ -49,8 +51,8 @@
 }
 
 #commentInputAndListDivider {
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin-top: 40px;
+  margin-bottom: 40px;
 }
 
 .commentContainer {
@@ -77,4 +79,22 @@
   border: none;
   cursor: pointer;
   outline: none;
+}
+
+#commentLoader {
+  color: seagreen;
+  font-size: large;
+}
+
+#commentError {
+  color: palevioletred;
+  font-size: large;
+}
+
+#commentSubmitError {
+  color: palevioletred;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  text-align: center;
 }

@@ -1,12 +1,16 @@
 // TODOs:
 // Improve commentary alignment
 // Comment submit loader
+// Comment input validation along with error styling
+// Input val will include data sanitization?
 // Build an error screen for comment submit
-// Slight error handler for upvote failure
+// Slight error handler for upvote failure or "fire and forget?"
 // Handle upvoting with mock api
 // Comment time formatter
 // User Randomizer
 // Remove Mock APIs
+// Split script into multiple files and modules?
+// Instead of clearing older comments while fetching again, keep them and add new ones later using Diffing.
 
 // Constants and Helpers
 const API_TIMEOUT_MS = 980;
@@ -45,7 +49,7 @@ const submitCommentToAPI = async (commentData) => {
   return new Promise((resolve, reject) => {
     const randomMs = getRandomNumber(1000);
     setTimeout(() => {
-      if (randomMs < API_TIMEOUT_MS) {
+      if (randomMs < 9) {
         storedComments = [commentData, ...storedComments]; // Add comment on top
         resolve("Submitted");
       } else {
@@ -88,7 +92,8 @@ const $commentInput = D.querySelector("#commentInput");
 const $commentSubmit = D.querySelector("#commentSubmit");
 const $commentList = D.querySelector("#commentList");
 const $commentLoader = D.querySelector("#commentLoader");
-const $commentError = D.querySelector("#commentError");
+const $commentListError = D.querySelector("#commentListError");
+const $commentSubmitError = D.querySelector("#commentSubmitError");
 
 // DOM Manipulation
 const buildComment = (comment) => {
@@ -114,32 +119,32 @@ const buildComment = (comment) => {
 
   return $comment;
 };
-const buildComments = (comments) => {
+const buildCommentList = (comments) => {
   $commentList.innerHTML = "";
   comments.forEach((comment) => {
     $commentList.appendChild(buildComment(comment));
   });
 };
-const buildError = () => {
-  $commentError.appendChild(D.createTextNode(state.error));
+const buildCommentListError = () => {
+  $commentListError.appendChild(D.createTextNode(state.error));
 };
 const updateView = (action) => {
   const { type } = action;
   switch (type) {
     case VIEW.LOADING:
-      $commentList.classList.add("hidden");
-      $commentError.classList.add("hidden");
+      // $commentList.classList.add("hidden");
+      $commentListError.classList.add("hidden");
       $commentLoader.classList.remove("hidden");
       break;
     case VIEW.DATA:
-      buildComments(state.data);
+      buildCommentList(state.data);
       $commentLoader.classList.add("hidden");
       $commentList.classList.remove("hidden");
       break;
     case VIEW.ERROR:
-      buildError();
+      buildCommentListError();
       $commentLoader.classList.add("hidden");
-      $commentError.classList.remove("hidden");
+      $commentListError.classList.remove("hidden");
   }
 };
 
@@ -167,8 +172,13 @@ const submitComment = async () => {
       text: $commentInput.value,
     });
     loadComments();
-  } catch (e) {
-    console.log(e);
+  } catch (error) {
+    $commentSubmitError.classList.remove("hidden");
+    $commentSubmitError.innerHTML = "";
+    $commentSubmitError.appendChild(D.createTextNode(error));
+    setTimeout(() => {
+      $commentSubmitError.classList.add("hidden");
+    }, 5000);
   }
 };
 
