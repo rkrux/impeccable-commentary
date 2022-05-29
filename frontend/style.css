@@ -2,6 +2,14 @@
   display: none;
 }
 
+.success {
+  color: seagreen;
+}
+
+.error {
+  color: palevioletred;
+}
+
 #commentary {
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
   width: 50vw;
@@ -82,8 +90,9 @@
 }
 
 #commentLoader {
-  color: seagreen;
+  color: darkblue;
   font-size: large;
+  margin-bottom: 20px;
 }
 
 #commentError {
@@ -91,8 +100,7 @@
   font-size: large;
 }
 
-#commentSubmitError {
-  color: palevioletred;
+#commentSubmitMessage {
   position: absolute;
   top: 0;
   width: 100%;
