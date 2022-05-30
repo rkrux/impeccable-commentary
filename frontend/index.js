@@ -1,7 +1,6 @@
 // TODOs:
 // Comment input validation along with error styling
 // Input val will include data sanitization?
-// Issue: Once submit comment api fails, the notification is still in red for later successful api calls
 // Comment time formatter
 // User Randomizer
 // Remove Mock APIs
@@ -9,9 +8,9 @@
 // Instead of clearing older comments while fetching again, keep them and add new ones later using Diffing.
 
 // Constants and Helpers
-const API_TIMEOUT_MS = 800,
+const API_TIMEOUT_MS = 990,
   API_MAX_THRESHOLD_MS = 1000,
-  MESSAGE_TIMEOUT_MS = 5000,
+  MESSAGE_TIMEOUT_MS = 4000,
   ASYNC_STATES = {
     LOADING: 0,
     DATA: 1,
@@ -140,16 +139,19 @@ const $notification = D.querySelector("#notification");
 
 // DOM Manipulation
 const _buildNotification = (stateType, asyncStateType, className) => () => {
-  // Needs to be a closure
+  // This function needs to be a closure since the state values need to be
+  // picked up during run-time. Only state independent data is taken as input.
+
   const message = state[stateType][asyncStateType];
-  $commentSubmit.textContent = "Comment";
+
   $notification.innerHTML = "";
-  $notification.classList.add(className);
   $notification.appendChild(D.createTextNode(message));
+  $notification.classList.add(className);
   $notification.classList.remove("hidden");
 
   setTimeout(() => {
     $notification.classList.add("hidden");
+    $notification.classList.remove(className);
   }, MESSAGE_TIMEOUT_MS);
 };
 const _buildComment = (comment) => {
@@ -254,14 +256,15 @@ const stateCommentSubmitLoadingView = () => {
   $commentSubmit.textContent = "Submitting...";
 };
 const stateCommentSubmitSuccessView = () => {
-  _buildNotification("commentSubmit", "data", "success")();
+  $commentSubmit.textContent = "Comment";
   loadCommentList();
+  // Consider removing this to reduce UX interactions
+  _buildNotification("commentSubmit", "data", "success")();
 };
-const stateCommentSubmitErrorView = _buildNotification(
-  "commentSubmit",
-  "error",
-  "error"
-);
+const stateCommentSubmitErrorView = () => {
+  $commentSubmit.textContent = "Comment";
+  _buildNotification("commentSubmit", "error", "error")();
+};
 
 const stateCommentUpvoteLoadingView = () => {};
 const stateCommentUpvoteSuccessView = () => {
