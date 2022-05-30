@@ -1,7 +1,7 @@
 // TODOs:
 // Comment input validation along with error styling
 // Input val will include data sanitization?
-// Slight error handler for upvote failure or "fire and forget?"
+// Issue: Once submit comment api fails, the notification is still in red for later successful api calls
 // Comment time formatter
 // User Randomizer
 // Remove Mock APIs
@@ -9,7 +9,7 @@
 // Instead of clearing older comments while fetching again, keep them and add new ones later using Diffing.
 
 // Constants and Helpers
-const API_TIMEOUT_MS = 500,
+const API_TIMEOUT_MS = 800,
   API_MAX_THRESHOLD_MS = 1000,
   MESSAGE_TIMEOUT_MS = 5000,
   ASYNC_STATES = {
@@ -139,7 +139,9 @@ const $commentListError = D.querySelector("#commentListError");
 const $notification = D.querySelector("#notification");
 
 // DOM Manipulation
-const _buildNotification = (message, className) => () => {
+const _buildNotification = (stateType, asyncStateType, className) => () => {
+  // Needs to be a closure
+  const message = state[stateType][asyncStateType];
   $commentSubmit.textContent = "Comment";
   $notification.innerHTML = "";
   $notification.classList.add(className);
@@ -251,12 +253,26 @@ const stateCommentListErrorView = () => {
 const stateCommentSubmitLoadingView = () => {
   $commentSubmit.textContent = "Submitting...";
 };
-const stateCommentSubmitSuccessView = function () {
-  _buildNotification(state.commentSubmit.data, "success")();
+const stateCommentSubmitSuccessView = () => {
+  _buildNotification("commentSubmit", "data", "success")();
   loadCommentList();
 };
 const stateCommentSubmitErrorView = _buildNotification(
-  state.commentSubmit.error,
+  "commentSubmit",
+  "error",
+  "error"
+);
+
+const stateCommentUpvoteLoadingView = () => {};
+const stateCommentUpvoteSuccessView = () => {
+  const $commentToUpdate = D.querySelector(
+    `#${state.commentUpvote.data.targetId}`
+  );
+  $commentToUpdate.innerHTML = `${state.commentUpvote.data.updatedUpvotes} &#9650; Upvote`;
+};
+const stateCommentUpvoteErrorView = _buildNotification(
+  "commentUpvote",
+  "error",
   "error"
 );
 
@@ -272,16 +288,9 @@ const viewBuilders = {
     error: stateCommentSubmitErrorView,
   },
   commentUpvote: {
-    loading: () => {},
-    data: () => {
-      const $commentToUpdate = document.querySelector(
-        `#${state.commentUpvote.data.targetId}`
-      );
-      $commentToUpdate.innerHTML = `${state.commentUpvote.data.updatedUpvotes} &#9650; Upvote`;
-    },
-    error: () => {
-      _buildNotification(state.commentUpvote.error, "error")();
-    },
+    loading: stateCommentUpvoteLoadingView,
+    data: stateCommentUpvoteSuccessView,
+    error: stateCommentUpvoteErrorView,
   },
 };
 const getViewBuilderByStateType = (stateType) => (action) => {
@@ -299,7 +308,7 @@ const getViewBuilderByStateType = (stateType) => (action) => {
   }
 };
 
-// Dynamic Flow
+// Asynchronous Flow
 const loadCommentList = async () => {
   const update = (action) => {
     getStateUpdaterByStateType("commentList")(action);
