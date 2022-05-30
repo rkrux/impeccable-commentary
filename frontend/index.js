@@ -147,6 +147,17 @@ const upvoteHandler = async (event, commentId) => {
   }
 };
 
+const _buildNotification = (message, className) => () => {
+  $commentSubmit.textContent = "Comment";
+  $notification.innerHTML = "";
+  $notification.classList.add(className);
+  $notification.appendChild(D.createTextNode(message));
+  $notification.classList.remove("hidden");
+
+  setTimeout(() => {
+    $notification.classList.add("hidden");
+  }, MESSAGE_TIMEOUT_MS);
+};
 const _buildComment = (comment) => {
   const { commentId, commentText, userName, createdAt, upvotes } = comment;
 
@@ -245,27 +256,15 @@ const stateCommentListErrorView = () => {
   $commentListError.classList.remove("hidden");
 };
 
-const _buildCommentSubmitMessage = (asyncStateType, className) => () => {
-  const message = state.commentSubmit[asyncStateType];
-  $commentSubmit.textContent = "Comment";
-  $notification.innerHTML = "";
-  $notification.classList.add(className);
-  $notification.appendChild(D.createTextNode(message));
-  $notification.classList.remove("hidden");
-
-  setTimeout(() => {
-    $notification.classList.add("hidden");
-  }, MESSAGE_TIMEOUT_MS);
-};
 const stateCommentSubmitLoadingView = () => {
   $commentSubmit.textContent = "Submitting...";
 };
 const stateCommentSubmitSuccessView = function () {
-  _buildCommentSubmitMessage("data", "success")();
+  _buildNotification(state.commentSubmit.data, "success")();
   loadCommentList();
 };
-const stateCommentSubmitErrorView = _buildCommentSubmitMessage(
-  "error",
+const stateCommentSubmitErrorView = _buildNotification(
+  state.commentSubmit.error,
   "error"
 );
 
