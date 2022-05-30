@@ -9,7 +9,7 @@
 // Instead of clearing older comments while fetching again, keep them and add new ones later using Diffing.
 
 // Constants and Helpers
-const API_TIMEOUT_MS = 980,
+const API_TIMEOUT_MS = 500,
   API_MAX_THRESHOLD_MS = 1000,
   MESSAGE_TIMEOUT_MS = 5000,
   ASYNC_STATES = {
@@ -49,7 +49,7 @@ const getCommentsFromAPI = async () => {
       if (randomMs < API_TIMEOUT_MS) {
         resolve(storedComments);
       } else {
-        reject(`Unable to fetch comments from API, time: ${randomMs}ms`);
+        reject(`Unable to fetch comments, time: ${randomMs}ms`);
       }
     }, randomMs);
   });
@@ -70,7 +70,7 @@ const postCommentToAPI = async (commentData) => {
         ];
         resolve("Submitted");
       } else {
-        reject(`Unable to submit comment to API, time: ${randomMs}ms`);
+        reject(`Unable to submit comment, time: ${randomMs}ms`);
       }
     }, randomMs);
   });
@@ -89,7 +89,7 @@ const upvoteCommentToAPI = async ({ commentId, userId }) => {
           });
         resolve({ updatedUpvotes });
       } else {
-        reject(`Unable to submit comment to API, time: ${randomMs}ms`);
+        reject(`Unable to upvote comment, time: ${randomMs}ms`);
       }
     }, randomMs);
   });
@@ -103,6 +103,11 @@ const state = {
     error: null,
   },
   commentSubmit: {
+    loading: false,
+    data: null,
+    error: null,
+  },
+  commentUpvote: {
     loading: false,
     data: null,
     error: null,
@@ -134,19 +139,6 @@ const $commentListError = D.querySelector("#commentListError");
 const $notification = D.querySelector("#notification");
 
 // DOM Manipulation
-const upvoteHandler = async (event, commentId) => {
-  try {
-    const result = await upvoteCommentToAPI({
-      commentId,
-      userId: 12, // TODO: Randomize
-    });
-    const $comment = document.querySelector(`#${event.target.id}`);
-    $comment.innerHTML = `${result.updatedUpvotes} &#9650; Upvote`;
-  } catch (error) {
-    console.log("Error in upvoting:", error);
-  }
-};
-
 const _buildNotification = (message, className) => () => {
   $commentSubmit.textContent = "Comment";
   $notification.innerHTML = "";
@@ -201,9 +193,9 @@ const _buildComment = (comment) => {
         const $element = D.createElement("button");
         $element.id = `comment-${commentId}-upvote`;
         $element.className = "commentAction";
-        $element.addEventListener("click", (event) => {
-          upvoteHandler(event, commentId);
-        });
+        $element.addEventListener("click", (event) =>
+          upvoteComment(event, commentId)
+        );
         $element.innerHTML = `${upvotes} &#9650; Upvote`;
         return $element;
       })()
@@ -279,6 +271,18 @@ const viewBuilders = {
     data: stateCommentSubmitSuccessView,
     error: stateCommentSubmitErrorView,
   },
+  commentUpvote: {
+    loading: () => {},
+    data: () => {
+      const $commentToUpdate = document.querySelector(
+        `#${state.commentUpvote.data.targetId}`
+      );
+      $commentToUpdate.innerHTML = `${state.commentUpvote.data.updatedUpvotes} &#9650; Upvote`;
+    },
+    error: () => {
+      _buildNotification(state.commentUpvote.error, "error")();
+    },
+  },
 };
 const getViewBuilderByStateType = (stateType) => (action) => {
   const { type } = action;
@@ -324,6 +328,29 @@ const submitComment = async () => {
       commentText: $commentInput.value,
     });
     update({ type: ASYNC_STATES.DATA, payload: "Submitted comment!" });
+  } catch (error) {
+    update({ type: ASYNC_STATES.ERROR, payload: error });
+  }
+};
+const upvoteComment = async (event, commentId) => {
+  const update = (action) => {
+    getStateUpdaterByStateType("commentUpvote")(action);
+    getViewBuilderByStateType("commentUpvote")(action);
+  };
+
+  update({ type: ASYNC_STATES.LOADING });
+  try {
+    const result = await upvoteCommentToAPI({
+      commentId,
+      userId: 12, // TODO: Randomize
+    });
+    update({
+      type: ASYNC_STATES.DATA,
+      payload: {
+        targetId: event.target.id,
+        updatedUpvotes: result.updatedUpvotes,
+      },
+    });
   } catch (error) {
     update({ type: ASYNC_STATES.ERROR, payload: error });
   }
