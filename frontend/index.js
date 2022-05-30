@@ -2,7 +2,6 @@
 // Comment input validation along with error styling
 // Input val will include data sanitization?
 // Slight error handler for upvote failure or "fire and forget?"
-// Handle upvoting with mock api
 // Comment time formatter
 // User Randomizer
 // Remove Mock APIs
@@ -21,6 +20,7 @@ const API_TIMEOUT_MS = 980,
 let storedComments = [
   {
     commentId: 2,
+    userId: 2,
     userName: "Cameron Lawrence",
     createdAt: Date.now(),
     commentText:
@@ -30,6 +30,7 @@ let storedComments = [
   },
   {
     commentId: 1,
+    userId: 1,
     userName: "Rob Hope",
     createdAt: Date.now(),
     commentText:
@@ -130,34 +131,93 @@ const $commentSubmit = D.querySelector("#commentSubmit");
 const $commentList = D.querySelector("#commentList");
 const $commentLoader = D.querySelector("#commentLoader");
 const $commentListError = D.querySelector("#commentListError");
-const $commentSubmitMessage = D.querySelector("#commentSubmitMessage");
+const $notification = D.querySelector("#notification");
 
 // DOM Manipulation
-const upvoteHandler = (event, commentId) => {
-  console.log("upvoteHandler, event:", event, commentId);
+const upvoteHandler = async (event, commentId) => {
+  try {
+    const result = await upvoteCommentToAPI({
+      commentId,
+      userId: 12, // TODO: Randomize
+    });
+    const $comment = document.querySelector(`#${event.target.id}`);
+    $comment.innerHTML = `${result.updatedUpvotes} &#9650; Upvote`;
+  } catch (error) {
+    console.log("Error in upvoting:", error);
+  }
 };
+
 const _buildComment = (comment) => {
   const { commentId, commentText, userName, createdAt, upvotes } = comment;
-  const $comment = D.createElement("div");
-  $comment.innerHTML = `
-      <div id="comment-${commentId}" class="commentContainer">
-            <div class="displayPictureContainer">
-              <div class="displayPicture">${userName.charAt(0) ?? ""}</div>
-            </div>
-            <div class="commentDetails">
-              <div class="commentHeading">
-                <span class="commentUser">${userName}</span>
-                <span>&#183;</span>
-                <span class="commentCreatedAt">${createdAt}</span>
-              </div>
-              <p class="commentText">${commentText}</p>
-              <button class="commentAction" id="comment-${commentId}-upvote" onclick="upvoteHandler(event)">${upvotes} &#9650; Upvote</button>
-              <button class="commentAction" id="comment-${commentId}-reply">Reply</button>
-          </div>
-      </div>
-    `;
 
-  return $comment;
+  const $displayPictureContainer = (function () {
+    const $element = D.createElement("div");
+    $element.className = "displayPictureContainer";
+
+    $element.appendChild(
+      (function () {
+        const $element = D.createElement("div");
+        $element.className = "displayPicture";
+        $element.textContent = userName.charAt(0) ?? "";
+        return $element;
+      })()
+    );
+    return $element;
+  })();
+
+  const $commentDetails = (function () {
+    const $element = D.createElement("div");
+    $element.className = "commentDetails";
+
+    $element.appendChild(
+      (function () {
+        const $element = D.createElement("div");
+        $element.className = "commentHeading";
+        $element.innerHTML = `<span class="commentUser">${userName}</span><span>&#183;</span><span class="commentCreatedAt">${createdAt}</span>`;
+        return $element;
+      })()
+    );
+    $element.appendChild(
+      (function () {
+        const $element = D.createElement("p");
+        $element.className = "commentText";
+        $element.textContent = commentText;
+        return $element;
+      })()
+    );
+    $element.appendChild(
+      (function () {
+        const $element = D.createElement("button");
+        $element.id = `comment-${commentId}-upvote`;
+        $element.className = "commentAction";
+        $element.addEventListener("click", (event) => {
+          upvoteHandler(event, commentId);
+        });
+        $element.innerHTML = `${upvotes} &#9650; Upvote`;
+        return $element;
+      })()
+    );
+    $element.appendChild(
+      (function () {
+        const $element = D.createElement("button");
+        $element.id = `comment-${commentId}-reply`;
+        $element.className = "commentAction";
+        $element.textContent = `Reply`;
+        return $element;
+      })()
+    );
+    return $element;
+  })();
+
+  return (function () {
+    const $element = D.createElement("div");
+    $element.setAttribute("id", `comment-${commentId}`);
+    $element.className = "commentContainer";
+    $element.appendChild($displayPictureContainer);
+    $element.appendChild($commentDetails);
+
+    return $element;
+  })();
 };
 const stateCommentListLoadingView = () => {
   $commentLoader.textContent = "Loading comments...";
@@ -188,13 +248,13 @@ const stateCommentListErrorView = () => {
 const _buildCommentSubmitMessage = (asyncStateType, className) => () => {
   const message = state.commentSubmit[asyncStateType];
   $commentSubmit.textContent = "Comment";
-  $commentSubmitMessage.innerHTML = "";
-  $commentSubmitMessage.classList.add(className);
-  $commentSubmitMessage.appendChild(D.createTextNode(message));
-  $commentSubmitMessage.classList.remove("hidden");
+  $notification.innerHTML = "";
+  $notification.classList.add(className);
+  $notification.appendChild(D.createTextNode(message));
+  $notification.classList.remove("hidden");
 
   setTimeout(() => {
-    $commentSubmitMessage.classList.add("hidden");
+    $notification.classList.add("hidden");
   }, MESSAGE_TIMEOUT_MS);
 };
 const stateCommentSubmitLoadingView = () => {
@@ -260,10 +320,11 @@ const submitComment = async () => {
   update({ type: ASYNC_STATES.LOADING });
   try {
     await postCommentToAPI({
-      userName: "Lashawn Williams",
+      userId: 3, // TODO: Randomize
+      userName: "Lashawn Williams", // TODO: Randomize
       commentText: $commentInput.value,
     });
-    update({ type: ASYNC_STATES.DATA, payload: "Submitted comment" });
+    update({ type: ASYNC_STATES.DATA, payload: "Submitted comment!" });
   } catch (error) {
     update({ type: ASYNC_STATES.ERROR, payload: error });
   }
