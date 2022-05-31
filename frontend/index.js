@@ -1,6 +1,5 @@
 // TODOs:
 // Comment time formatter
-// User Randomizer
 // CommentUpvote each to have individual state, instead of one global state for all comment upvotes
 // Remove Mock APIs
 // Split script into multiple files and modules?
@@ -156,6 +155,8 @@ const getStateUpdaterByStateType = (stateType) => (action) => {
 
 // DOM Manipulation
 const D = document;
+const $appInitialization = D.querySelector("#appInitialization");
+const $commentary = D.querySelector("#commentary");
 const $userDisplayPic = D.querySelector("#displayPic");
 const $commentInput = D.querySelector("#commentInput");
 const $commentSubmit = D.querySelector("#commentSubmit");
@@ -186,11 +187,12 @@ const handleCommentSubmit = async () => {
   const commentText = $commentInput.value.trim(); // TODO: Santize input
   if (commentText.length === 0) {
     $commentInput.className = "erroneousInput";
-  } else {
-    await submitComment(commentText);
-    if (state.commentSubmit.error === null) {
-      selectNewUser();
-    }
+    return;
+  }
+
+  await submitComment(commentText);
+  if (state.commentSubmit.error === null) {
+    selectNewUser();
   }
 };
 const _buildNotification = (stateType, asyncStateType, className) => () => {
@@ -282,6 +284,18 @@ const _buildComment = (comment) => {
   })();
 };
 
+// List User Views
+const stateUserListLoadingView = () => {
+  $appInitialization.textContent = "Initializing App...";
+};
+const stateUserListSuccessView = () => {
+  $appInitialization.className = "hidden";
+  $commentary.classList.remove("hidden");
+};
+const stateUserListErrorView = () => {
+  $appInitialization.textContent = state.userList.error;
+};
+
 // List Comment Views
 const stateCommentListLoadingView = () => {
   $commentLoader.textContent = "Loading comments...";
@@ -339,6 +353,11 @@ const stateCommentUpvoteErrorView = _buildNotification(
 );
 
 const viewBuilders = {
+  userList: {
+    loading: stateUserListLoadingView,
+    data: stateUserListSuccessView,
+    error: stateUserListErrorView,
+  },
   commentList: {
     loading: stateCommentListLoadingView,
     data: stateCommentListSuccessView,
@@ -374,6 +393,7 @@ const getViewBuilderByStateType = (stateType) => (action) => {
 const loadUsers = async () => {
   const update = (action) => {
     getStateUpdaterByStateType("userList")(action);
+    getViewBuilderByStateType("userList")(action);
   };
 
   update({ type: ASYNC_STATES.LOADING });
