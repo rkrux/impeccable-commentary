@@ -1,9 +1,7 @@
 // TODOs:
-// Comment time formatter
 // CommentUpvote each to have individual state, instead of one global state for all comment upvotes
 // Remove Mock APIs
 // Split script into multiple files and modules?
-// Instead of clearing older comments while fetching again, keep them and add new ones later using Diffing.
 
 // Constants and Helpers
 const API_TIMEOUT_MS = 990,
@@ -28,7 +26,7 @@ let storedComments = [
     commentId: 2,
     userId: storedUsers[1].userId,
     userName: storedUsers[1].userName,
-    createdAt: Date.now(),
+    createdAt: Date.now() - 14400000,
     commentText:
       "Love the native memberships and the zipless themes, I was just asked by a friend about options\
         for a new site, and I think I know what I will be recommending then...",
@@ -38,7 +36,7 @@ let storedComments = [
     commentId: 1,
     userId: storedUsers[0].userId,
     userName: storedUsers[0].userName,
-    createdAt: Date.now(),
+    createdAt: Date.now() - 1200000,
     commentText:
       "Now that's a huge release with some big community earnings back to it - it must be so\
      rewarding seeing creators quit their day jobs after monetizing (with real MRR) on the new platform.",
@@ -111,6 +109,31 @@ const upvoteCommentToAPI = async ({ commentId, userId }) => {
       }
     }, randomMs);
   });
+};
+const getFormattedDuration = (dateTimeInMs) => {
+  const durationInSec = (Date.now() - dateTimeInMs) / 1000;
+  if (durationInSec < 1) {
+    return `now`;
+  }
+  if (durationInSec < 60) {
+    return `${Math.floor(durationInSec)} secs ago`;
+  }
+  if (durationInSec < 3600) {
+    return `${Math.floor(durationInSec / 60)} mins ago`;
+  }
+  if (durationInSec < 86400) {
+    return `${Math.floor(durationInSec / 3600)} hrs ago`;
+  }
+  if (durationInSec < 604800) {
+    return `${Math.floor(durationInSec / 86400)} days ago`;
+  }
+  if (durationInSec < 2628000) {
+    return `${Math.floor(durationInSec / 604800)} weeks ago`;
+  }
+  if (durationInSec < 31540000) {
+    return `${Math.floor(durationInSec / 2628000)} months ago`;
+  }
+  return `${Math.floor(durationInSec / 31540000)} years ago`;
 };
 
 // Application Data
@@ -237,7 +260,9 @@ const _buildComment = (comment) => {
       (function () {
         const $element = D.createElement("div");
         $element.className = "commentHeading";
-        $element.innerHTML = `<span class="commentUser">${userName}</span><span>&#183;</span><span class="commentCreatedAt">${createdAt}</span>`;
+        $element.innerHTML = `<span class="commentUser">${userName}</span><span>&nbsp;&#183;&nbsp;</span><span class="commentCreatedAt">${getFormattedDuration(
+          createdAt
+        )}</span>`;
         return $element;
       })()
     );
