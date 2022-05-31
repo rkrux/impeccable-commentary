@@ -29,8 +29,8 @@ let storedComments = [
     userName: storedUsers[1].userName,
     createdAt: Date.now() - 1200000,
     commentText:
-      "Love the native memberships and the zipless themes, I was just asked by a friend about options\
-        for a new site, and I think I know what I will be recommending then...",
+      "Integer eget nulla sodales, mattis ante mattis, ullamcorper velit. Praesent vitae neque tristique,\
+      accumsan arcu sit amet, ullamcorper risus. Donec facilisis nulla ipsum, vitae vehicula nisi sollicitudin vitae. ",
     upvotes: 10,
   },
   {
@@ -39,8 +39,8 @@ let storedComments = [
     userName: storedUsers[0].userName,
     createdAt: Date.now() - 14400000,
     commentText:
-      "Now that's a huge release with some big community earnings back to it - it must be so\
-     rewarding seeing creators quit their day jobs after monetizing (with real MRR) on the new platform.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ullamcorper turpis nisl, vitae\
+      pretium quam lacinia vitae. Pellentesque posuere at tellus nec euismod.",
     upvotes: 5,
   },
 ];
