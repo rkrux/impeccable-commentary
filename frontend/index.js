@@ -1,6 +1,4 @@
 // TODOs:
-// Comment input validation along with error styling
-// Input val will include data sanitization?
 // Comment time formatter
 // User Randomizer
 // Remove Mock APIs
@@ -128,7 +126,7 @@ const getStateUpdaterByStateType = (stateType) => (action) => {
   }
 };
 
-// DOM Nodes
+// DOM Manipulation
 const D = document;
 const $commentInput = D.querySelector("#commentInput");
 const $commentSubmit = D.querySelector("#commentSubmit");
@@ -137,7 +135,21 @@ const $commentLoader = D.querySelector("#commentLoader");
 const $commentListError = D.querySelector("#commentListError");
 const $notification = D.querySelector("#notification");
 
-// DOM Manipulation
+// Event Handlers
+const handleCommentSubmit = () => {
+  const commentText = $commentInput.value.trim(); // TODO: Santize input
+  if (commentText.length === 0) {
+    $commentInput.className = "erroneousInput";
+  } else {
+    submitComment(commentText);
+  }
+};
+const handleCommentInput = () => {
+  const commentText = $commentInput.value;
+  if (commentText.trim().length > 0) {
+    $commentInput.className = "emptyOrValidInput";
+  }
+};
 const _buildNotification = (stateType, asyncStateType, className) => () => {
   // This function needs to be a closure since the state values need to be
   // picked up during run-time. Only state independent data is taken as input.
@@ -226,10 +238,12 @@ const _buildComment = (comment) => {
     return $element;
   })();
 };
+
+// List Comment Views
 const stateCommentListLoadingView = () => {
   $commentLoader.textContent = "Loading comments...";
   /*
-  By not hiding the exisitng list, user gets the chance to view the exisiting comments
+  By not hiding the existing list, user gets the chance to view the existing comments
   instead of seeing only the loader - leads to better UX.
   // $commentList.classList.add("hidden");
   */
@@ -252,6 +266,7 @@ const stateCommentListErrorView = () => {
   $commentListError.classList.remove("hidden");
 };
 
+// Submit Comment Views
 const stateCommentSubmitLoadingView = () => {
   $commentSubmit.textContent = "Submitting...";
 };
@@ -266,6 +281,7 @@ const stateCommentSubmitErrorView = () => {
   _buildNotification("commentSubmit", "error", "error")();
 };
 
+// Upvote Comment Views
 const stateCommentUpvoteLoadingView = () => {};
 const stateCommentUpvoteSuccessView = () => {
   const $commentToUpdate = D.querySelector(
@@ -326,7 +342,7 @@ const loadCommentList = async () => {
     update({ type: ASYNC_STATES.ERROR, payload: error });
   }
 };
-const submitComment = async () => {
+const submitComment = async (commentText) => {
   const update = (action) => {
     getStateUpdaterByStateType("commentSubmit")(action);
     getViewBuilderByStateType("commentSubmit")(action);
@@ -337,7 +353,7 @@ const submitComment = async () => {
     await postCommentToAPI({
       userId: 3, // TODO: Randomize
       userName: "Lashawn Williams", // TODO: Randomize
-      commentText: $commentInput.value,
+      commentText,
     });
     update({ type: ASYNC_STATES.DATA, payload: "Submitted comment!" });
   } catch (error) {
@@ -369,5 +385,8 @@ const upvoteComment = async (event, commentId) => {
 };
 
 // App initialization
-$commentSubmit.onclick = submitComment;
-loadCommentList();
+(function initApp() {
+  $commentInput.addEventListener("change", handleCommentInput);
+  $commentSubmit.addEventListener("click", handleCommentSubmit);
+  loadCommentList();
+})();
