@@ -1,6 +1,7 @@
 // TODOs:
 // Comment time formatter
 // User Randomizer
+// CommentUpvote each to have individual state, instead of one global state for all comment upvotes
 // Remove Mock APIs
 // Split script into multiple files and modules?
 // Instead of clearing older comments while fetching again, keep them and add new ones later using Diffing.
@@ -14,11 +15,20 @@ const API_TIMEOUT_MS = 990,
     DATA: 1,
     ERROR: 2,
   };
+let storedUsers = [
+  { userId: 1, userName: "Rob Hope" },
+  { userId: 2, userName: "Cameron Lawrence" },
+  { userId: 3, userName: "Shawn Williams" },
+  { userId: 4, userName: "Michael Adams" },
+  { userId: 5, userName: "Jane Austin" },
+  { userId: 6, userName: "Alicia Schumacher" },
+  { userId: 7, userName: "Bridget Stacey" },
+];
 let storedComments = [
   {
     commentId: 2,
-    userId: 2,
-    userName: "Cameron Lawrence",
+    userId: storedUsers[1].userId,
+    userName: storedUsers[1].userName,
     createdAt: Date.now(),
     commentText:
       "Love the native memberships and the zipless themes, I was just asked by a friend about options\
@@ -27,8 +37,8 @@ let storedComments = [
   },
   {
     commentId: 1,
-    userId: 1,
-    userName: "Rob Hope",
+    userId: storedUsers[0].userId,
+    userName: storedUsers[0].userName,
     createdAt: Date.now(),
     commentText:
       "Now that's a huge release with some big community earnings back to it - it must be so\
@@ -38,6 +48,18 @@ let storedComments = [
 ];
 const getRandomNumber = (maxValue) => {
   return Math.floor(Math.random() * maxValue);
+};
+const getUsersFromAPI = async () => {
+  return new Promise((resolve, reject) => {
+    const randomMs = getRandomNumber(1000);
+    setTimeout(() => {
+      if (randomMs < API_TIMEOUT_MS) {
+        resolve(storedUsers);
+      } else {
+        reject(`Unable to fetch users, time: ${randomMs}ms`);
+      }
+    }, randomMs);
+  });
 };
 const getCommentsFromAPI = async () => {
   return new Promise((resolve, reject) => {
@@ -94,6 +116,12 @@ const upvoteCommentToAPI = async ({ commentId, userId }) => {
 
 // Application Data
 const state = {
+  userList: {
+    loading: false,
+    data: null,
+    error: null,
+  },
+  selectedUser: null,
   commentList: {
     loading: false,
     data: null,
@@ -128,6 +156,7 @@ const getStateUpdaterByStateType = (stateType) => (action) => {
 
 // DOM Manipulation
 const D = document;
+const $userDisplayPic = D.querySelector("#displayPic");
 const $commentInput = D.querySelector("#commentInput");
 const $commentSubmit = D.querySelector("#commentSubmit");
 const $commentList = D.querySelector("#commentList");
@@ -135,19 +164,33 @@ const $commentLoader = D.querySelector("#commentLoader");
 const $commentListError = D.querySelector("#commentListError");
 const $notification = D.querySelector("#notification");
 
-// Event Handlers
-const handleCommentSubmit = () => {
-  const commentText = $commentInput.value.trim(); // TODO: Santize input
-  if (commentText.length === 0) {
-    $commentInput.className = "erroneousInput";
+const selectNewUser = () => {
+  if (state.userList.data !== null) {
+    state.selectedUser =
+      state.userList.data[getRandomNumber(state.userList.data.length - 1)];
   } else {
-    submitComment(commentText);
+    state.selectedUser = { userId: 101, userName: "John Doe" }; // Default User;
   }
+
+  $userDisplayPic.textContent = state.selectedUser.userName.charAt(0);
 };
+
+// Event Handlers
 const handleCommentInput = () => {
   const commentText = $commentInput.value;
   if (commentText.trim().length > 0) {
     $commentInput.className = "emptyOrValidInput";
+  }
+};
+const handleCommentSubmit = async () => {
+  const commentText = $commentInput.value.trim(); // TODO: Santize input
+  if (commentText.length === 0) {
+    $commentInput.className = "erroneousInput";
+  } else {
+    await submitComment(commentText);
+    if (state.commentSubmit.error === null) {
+      selectNewUser();
+    }
   }
 };
 const _buildNotification = (stateType, asyncStateType, className) => () => {
@@ -169,15 +212,15 @@ const _buildNotification = (stateType, asyncStateType, className) => () => {
 const _buildComment = (comment) => {
   const { commentId, commentText, userName, createdAt, upvotes } = comment;
 
-  const $displayPictureContainer = (function () {
+  const $displayPicContainer = (function () {
     const $element = D.createElement("div");
-    $element.className = "displayPictureContainer";
+    $element.className = "displayPicContainer";
 
     $element.appendChild(
       (function () {
         const $element = D.createElement("div");
-        $element.className = "displayPicture";
-        $element.textContent = userName.charAt(0) ?? "";
+        $element.className = "displayPic";
+        $element.textContent = userName.charAt(0);
         return $element;
       })()
     );
@@ -232,7 +275,7 @@ const _buildComment = (comment) => {
     const $element = D.createElement("div");
     $element.setAttribute("id", `comment-${commentId}`);
     $element.className = "commentContainer";
-    $element.appendChild($displayPictureContainer);
+    $element.appendChild($displayPicContainer);
     $element.appendChild($commentDetails);
 
     return $element;
@@ -328,6 +371,19 @@ const getViewBuilderByStateType = (stateType) => (action) => {
 };
 
 // Asynchronous Flow
+const loadUsers = async () => {
+  const update = (action) => {
+    getStateUpdaterByStateType("userList")(action);
+  };
+
+  update({ type: ASYNC_STATES.LOADING });
+  try {
+    const users = await getUsersFromAPI();
+    update({ type: ASYNC_STATES.DATA, payload: users });
+  } catch (error) {
+    update({ type: ASYNC_STATES.ERROR, payload: error });
+  }
+};
 const loadCommentList = async () => {
   const update = (action) => {
     getStateUpdaterByStateType("commentList")(action);
@@ -351,8 +407,8 @@ const submitComment = async (commentText) => {
   update({ type: ASYNC_STATES.LOADING });
   try {
     await postCommentToAPI({
-      userId: 3, // TODO: Randomize
-      userName: "Lashawn Williams", // TODO: Randomize
+      userId: state.selectedUser.userId,
+      userName: state.selectedUser.userName,
       commentText,
     });
     update({ type: ASYNC_STATES.DATA, payload: "Submitted comment!" });
@@ -370,7 +426,7 @@ const upvoteComment = async (event, commentId) => {
   try {
     const result = await upvoteCommentToAPI({
       commentId,
-      userId: 12, // TODO: Randomize
+      userId: state.selectedUser.userId,
     });
     update({
       type: ASYNC_STATES.DATA,
@@ -385,8 +441,11 @@ const upvoteComment = async (event, commentId) => {
 };
 
 // App initialization
-(function initApp() {
+(async function initApp() {
   $commentInput.addEventListener("change", handleCommentInput);
   $commentSubmit.addEventListener("click", handleCommentSubmit);
+
+  await loadUsers();
+  selectNewUser();
   loadCommentList();
 })();
