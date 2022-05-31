@@ -1,5 +1,6 @@
 // TODOs:
 // CommentUpvote each to have individual state, instead of one global state for all comment upvotes
+// Try Again button for API failures?
 // Remove Mock APIs
 // Split script into multiple files and modules?
 
@@ -26,7 +27,7 @@ let storedComments = [
     commentId: 2,
     userId: storedUsers[1].userId,
     userName: storedUsers[1].userName,
-    createdAt: Date.now() - 14400000,
+    createdAt: Date.now() - 1200000,
     commentText:
       "Love the native memberships and the zipless themes, I was just asked by a friend about options\
         for a new site, and I think I know what I will be recommending then...",
@@ -36,7 +37,7 @@ let storedComments = [
     commentId: 1,
     userId: storedUsers[0].userId,
     userName: storedUsers[0].userName,
-    createdAt: Date.now() - 1200000,
+    createdAt: Date.now() - 14400000,
     commentText:
       "Now that's a huge release with some big community earnings back to it - it must be so\
      rewarding seeing creators quit their day jobs after monetizing (with real MRR) on the new platform.",
@@ -215,6 +216,7 @@ const handleCommentSubmit = async () => {
 
   await submitComment(commentText);
   if (state.commentSubmit.error === null) {
+    $commentInput.value = "";
     selectNewUser();
   }
 };
@@ -343,8 +345,11 @@ const stateCommentListSuccessView = () => {
 };
 const stateCommentListErrorView = () => {
   const error = state.commentList.error;
+  $commentListError.innerHTML = "";
   $commentListError.appendChild(D.createTextNode(error));
+
   $commentLoader.classList.add("hidden");
+  $commentList.classList.add("hidden");
   $commentListError.classList.remove("hidden");
 };
 

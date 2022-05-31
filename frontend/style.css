@@ -111,8 +111,8 @@ body {
   margin-bottom: 20px;
 }
 
-#commentError {
-  color: palevioletred;
+#commentListError {
+  color: rgb(204, 188, 194);
   font-size: large;
 }
 
