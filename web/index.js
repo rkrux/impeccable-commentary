@@ -1,17 +1,17 @@
 // TODOs:
 // Try Again button for API failures?
-// Remove Mock APIs
-// Split script into multiple files and modules?
+// Split script into multiple modules and add a bundler
 
 // Constants and Helpers
 const API_TIMEOUT_MS = 990,
-  API_MAX_THRESHOLD_MS = 1000,
-  MESSAGE_TIMEOUT_MS = 4000,
+  API_MAX_THRESHOLD_MS = 1000;
+const MESSAGE_TIMEOUT_MS = 4000,
   ASYNC_STATES = {
     LOADING: 0,
     DATA: 1,
     ERROR: 2,
   };
+
 let mockStoredUser = [
   { userId: 1, userName: "Martin Balsam" },
   { userId: 2, userName: "John Fiedler" },
@@ -43,42 +43,14 @@ let mockStoredComments = [
     createdAt: Date.now() - 14400000,
     commentText:
       "Nine of us now seem to feel that the defendant is innocent, but we're just gambling on probabilities.\
-      We may be wrong. We may be trying to return a guilty man to the community. No one can really know.\
-      But we have a reasonable doubt, and this is a safeguard that has enormous value in our system.\
-      No jury can declare a man guilty unless it's sure. We nine can't understand how you three are still so sure.\
-      Maybe you can tell us.",
+          We may be wrong. We may be trying to return a guilty man to the community. No one can really know.\
+          But we have a reasonable doubt, and this is a safeguard that has enormous value in our system.\
+          No jury can declare a man guilty unless it's sure. We nine can't understand how you three are still so sure.\
+          Maybe you can tell us.",
     upvotes: 8,
   },
 ];
 
-const getFormattedDuration = (dateTimeInMs) => {
-  const durationInSec = (Date.now() - dateTimeInMs) / 1000;
-  if (durationInSec < 1) {
-    return `now`;
-  }
-  if (durationInSec < 60) {
-    return `${Math.floor(durationInSec)} secs ago`;
-  }
-  if (durationInSec < 3600) {
-    return `${Math.floor(durationInSec / 60)} mins ago`;
-  }
-  if (durationInSec < 86400) {
-    return `${Math.floor(durationInSec / 3600)} hrs ago`;
-  }
-  if (durationInSec < 604800) {
-    return `${Math.floor(durationInSec / 86400)} days ago`;
-  }
-  if (durationInSec < 2628000) {
-    return `${Math.floor(durationInSec / 604800)} weeks ago`;
-  }
-  if (durationInSec < 31540000) {
-    return `${Math.floor(durationInSec / 2628000)} months ago`;
-  }
-  return `${Math.floor(durationInSec / 31540000)} years ago`;
-};
-const getRandomNumber = (maxValue) => {
-  return Math.floor(Math.random() * maxValue);
-};
 const mockGetUsersFromAPI = async () => {
   return new Promise((resolve, reject) => {
     const randomMs = getRandomNumber(1000);
@@ -143,10 +115,40 @@ const mockUpvoteCommentToAPI = async ({ commentId, userId }) => {
     }, randomMs);
   });
 };
+
 const getUsersFromAPI = mockGetUsersFromAPI;
 const getCommentsFromAPI = mockGetCommentsFromAPI;
 const postCommentToAPI = mockPostCommentToAPI;
 const upvoteCommentToAPI = mockUpvoteCommentToAPI;
+
+const getFormattedDuration = (dateTimeInMs) => {
+  const durationInSec = (Date.now() - dateTimeInMs) / 1000;
+  if (durationInSec < 1) {
+    return `now`;
+  }
+  if (durationInSec < 60) {
+    return `${Math.floor(durationInSec)} secs ago`;
+  }
+  if (durationInSec < 3600) {
+    return `${Math.floor(durationInSec / 60)} mins ago`;
+  }
+  if (durationInSec < 86400) {
+    return `${Math.floor(durationInSec / 3600)} hrs ago`;
+  }
+  if (durationInSec < 604800) {
+    return `${Math.floor(durationInSec / 86400)} days ago`;
+  }
+  if (durationInSec < 2628000) {
+    return `${Math.floor(durationInSec / 604800)} weeks ago`;
+  }
+  if (durationInSec < 31540000) {
+    return `${Math.floor(durationInSec / 2628000)} months ago`;
+  }
+  return `${Math.floor(durationInSec / 31540000)} years ago`;
+};
+const getRandomNumber = (maxValue) => {
+  return Math.floor(Math.random() * maxValue);
+};
 
 // Application Data
 const globalState = {
