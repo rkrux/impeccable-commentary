@@ -94,7 +94,7 @@ const postCommentToAPI = async (commentData) => {
 };
 const upvoteCommentToAPI = async ({ commentId, userId }) => {
   return new Promise((resolve, reject) => {
-    const randomMs = getRandomNumber(API_MAX_THRESHOLD_MS) + 2000;
+    const randomMs = getRandomNumber(API_MAX_THRESHOLD_MS);
     setTimeout(() => {
       if (randomMs < API_TIMEOUT_MS) {
         let updatedUpvotes = 0;
@@ -138,7 +138,7 @@ const getFormattedDuration = (dateTimeInMs) => {
 };
 
 // Application Data
-const state = {
+const globalState = {
   userList: {
     loading: false,
     data: null,
@@ -161,15 +161,15 @@ const getStateUpdaterByStateType = (stateType) => (action) => {
   switch (type) {
     // Consider removing the Loading state, it's not used after all.
     case ASYNC_STATES.LOADING:
-      state[stateType].loading = true;
+      globalState[stateType].loading = true;
       break;
     case ASYNC_STATES.DATA:
-      state[stateType].data = payload;
-      state[stateType].error = null;
+      globalState[stateType].data = payload;
+      globalState[stateType].error = null;
       break;
     case ASYNC_STATES.ERROR:
-      state[stateType].data = null;
-      state[stateType].error = payload;
+      globalState[stateType].data = null;
+      globalState[stateType].error = payload;
   }
 };
 
@@ -186,14 +186,16 @@ const $commentListError = D.querySelector("#commentListError");
 const $notification = D.querySelector("#notification");
 
 const selectNewUser = () => {
-  if (state.userList.data !== null) {
-    state.selectedUser =
-      state.userList.data[getRandomNumber(state.userList.data.length - 1)];
+  if (globalState.userList.data !== null) {
+    globalState.selectedUser =
+      globalState.userList.data[
+        getRandomNumber(globalState.userList.data.length - 1)
+      ];
   } else {
-    state.selectedUser = { userId: 101, userName: "John Doe" }; // Default User
+    globalState.selectedUser = { userId: 101, userName: "John Doe" }; // Default User
   }
 
-  $userDisplayPic.textContent = state.selectedUser.userName.charAt(0);
+  $userDisplayPic.textContent = globalState.selectedUser.userName.charAt(0);
 };
 
 // Event Handlers
@@ -211,7 +213,7 @@ const handleCommentSubmit = async () => {
   }
 
   await submitComment(commentText);
-  if (state.commentSubmit.error === null) {
+  if (globalState.commentSubmit.error === null) {
     $commentInput.value = "";
     selectNewUser();
   }
@@ -230,7 +232,7 @@ const _displayNotification = (message, className) => {
 const _buildNotification = (stateType, asyncStateType, className) => () => {
   // This function needs to be a closure since the state values need to be
   // picked up during run-time. Only state independent data is taken as input.
-  _displayNotification(state[stateType][asyncStateType], className);
+  _displayNotification(globalState[stateType][asyncStateType], className);
 };
 const _buildComment = (comment) => {
   const { commentId, commentText, userName, createdAt, upvotes } = comment;
@@ -317,7 +319,7 @@ const stateUserListSuccessView = () => {
   $commentary.classList.remove("hidden");
 };
 const stateUserListErrorView = () => {
-  $appInitialization.textContent = state.userList.error;
+  $appInitialization.textContent = globalState.userList.error;
 };
 
 // List Comment Views
@@ -332,7 +334,7 @@ const stateCommentListLoadingView = () => {
   $commentLoader.classList.remove("hidden");
 };
 const stateCommentListSuccessView = () => {
-  const comments = state.commentList.data;
+  const comments = globalState.commentList.data;
   $commentList.innerHTML = "";
   comments.forEach((comment) => {
     $commentList.appendChild(_buildComment(comment));
@@ -341,7 +343,7 @@ const stateCommentListSuccessView = () => {
   $commentList.classList.remove("hidden");
 };
 const stateCommentListErrorView = () => {
-  const error = state.commentList.error;
+  const error = globalState.commentList.error;
   $commentListError.innerHTML = "";
   $commentListError.appendChild(D.createTextNode(error));
 
@@ -434,8 +436,8 @@ const submitComment = async (commentText) => {
   update({ type: ASYNC_STATES.LOADING });
   try {
     await postCommentToAPI({
-      userId: state.selectedUser.userId,
-      userName: state.selectedUser.userName,
+      userId: globalState.selectedUser.userId,
+      userName: globalState.selectedUser.userName,
       commentText,
     });
     update({ type: ASYNC_STATES.DATA, payload: "Submitted comment!" });
@@ -451,7 +453,7 @@ const upvoteComment = async (event, commentId) => {
   try {
     const result = await upvoteCommentToAPI({
       commentId,
-      userId: state.selectedUser.userId,
+      userId: globalState.selectedUser.userId,
     });
     $element.setAttribute("upvotes", `${result.updatedUpvotes}`);
     $element.innerHTML = `${result.updatedUpvotes} &#9650; Upvote`;
