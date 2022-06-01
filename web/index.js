@@ -5,7 +5,7 @@
 // Split script into multiple files and modules?
 
 // Constants and Helpers
-const API_TIMEOUT_MS = 990,
+const API_TIMEOUT_MS = 2990,
   API_MAX_THRESHOLD_MS = 1000,
   MESSAGE_TIMEOUT_MS = 4000,
   ASYNC_STATES = {
@@ -94,7 +94,7 @@ const postCommentToAPI = async (commentData) => {
 };
 const upvoteCommentToAPI = async ({ commentId, userId }) => {
   return new Promise((resolve, reject) => {
-    const randomMs = getRandomNumber(API_MAX_THRESHOLD_MS);
+    const randomMs = getRandomNumber(API_MAX_THRESHOLD_MS) + 2000;
     setTimeout(() => {
       if (randomMs < API_TIMEOUT_MS) {
         let updatedUpvotes = 0;
@@ -155,15 +155,11 @@ const state = {
     data: null,
     error: null,
   },
-  commentUpvote: {
-    loading: false,
-    data: null,
-    error: null,
-  },
 };
 const getStateUpdaterByStateType = (stateType) => (action) => {
   const { type, payload } = action;
   switch (type) {
+    // Consider removing the Loading state, it's not used after all.
     case ASYNC_STATES.LOADING:
       state[stateType].loading = true;
       break;
@@ -194,7 +190,7 @@ const selectNewUser = () => {
     state.selectedUser =
       state.userList.data[getRandomNumber(state.userList.data.length - 1)];
   } else {
-    state.selectedUser = { userId: 101, userName: "John Doe" }; // Default User;
+    state.selectedUser = { userId: 101, userName: "John Doe" }; // Default User
   }
 
   $userDisplayPic.textContent = state.selectedUser.userName.charAt(0);
@@ -220,12 +216,7 @@ const handleCommentSubmit = async () => {
     selectNewUser();
   }
 };
-const _buildNotification = (stateType, asyncStateType, className) => () => {
-  // This function needs to be a closure since the state values need to be
-  // picked up during run-time. Only state independent data is taken as input.
-
-  const message = state[stateType][asyncStateType];
-
+const _displayNotification = (message, className) => {
   $notification.innerHTML = "";
   $notification.appendChild(D.createTextNode(message));
   $notification.classList.add(className);
@@ -235,6 +226,11 @@ const _buildNotification = (stateType, asyncStateType, className) => () => {
     $notification.classList.add("hidden");
     $notification.classList.remove(className);
   }, MESSAGE_TIMEOUT_MS);
+};
+const _buildNotification = (stateType, asyncStateType, className) => () => {
+  // This function needs to be a closure since the state values need to be
+  // picked up during run-time. Only state independent data is taken as input.
+  _displayNotification(state[stateType][asyncStateType], className);
 };
 const _buildComment = (comment) => {
   const { commentId, commentText, userName, createdAt, upvotes } = comment;
@@ -281,6 +277,7 @@ const _buildComment = (comment) => {
         const $element = D.createElement("button");
         $element.id = `comment-${commentId}-upvote`;
         $element.className = "commentAction";
+        $element.setAttribute("upvotes", `${upvotes}`);
         $element.addEventListener("click", (event) =>
           upvoteComment(event, commentId)
         );
@@ -302,7 +299,7 @@ const _buildComment = (comment) => {
 
   return (function () {
     const $element = D.createElement("div");
-    $element.setAttribute("id", `comment-${commentId}`);
+    $element.setAttribute("id", `comment-${commentId}`); // TODO: Use id directly
     $element.className = "commentContainer";
     $element.appendChild($displayPicContainer);
     $element.appendChild($commentDetails);
@@ -360,27 +357,12 @@ const stateCommentSubmitLoadingView = () => {
 const stateCommentSubmitSuccessView = () => {
   $commentSubmit.textContent = "Comment";
   loadCommentList();
-  // Consider removing this to reduce UX interactions
-  _buildNotification("commentSubmit", "data", "success")();
+  _buildNotification("commentSubmit", "data", "success")(); // Consider removing this to reduce UX interactions
 };
 const stateCommentSubmitErrorView = () => {
   $commentSubmit.textContent = "Comment";
   _buildNotification("commentSubmit", "error", "error")();
 };
-
-// Upvote Comment Views
-const stateCommentUpvoteLoadingView = () => {};
-const stateCommentUpvoteSuccessView = () => {
-  const $commentToUpdate = D.querySelector(
-    `#${state.commentUpvote.data.targetId}`
-  );
-  $commentToUpdate.innerHTML = `${state.commentUpvote.data.updatedUpvotes} &#9650; Upvote`;
-};
-const stateCommentUpvoteErrorView = _buildNotification(
-  "commentUpvote",
-  "error",
-  "error"
-);
 
 const viewBuilders = {
   userList: {
@@ -397,11 +379,6 @@ const viewBuilders = {
     loading: stateCommentSubmitLoadingView,
     data: stateCommentSubmitSuccessView,
     error: stateCommentSubmitErrorView,
-  },
-  commentUpvote: {
-    loading: stateCommentUpvoteLoadingView,
-    data: stateCommentUpvoteSuccessView,
-    error: stateCommentUpvoteErrorView,
   },
 };
 const getViewBuilderByStateType = (stateType) => (action) => {
@@ -467,26 +444,20 @@ const submitComment = async (commentText) => {
   }
 };
 const upvoteComment = async (event, commentId) => {
-  const update = (action) => {
-    getStateUpdaterByStateType("commentUpvote")(action);
-    getViewBuilderByStateType("commentUpvote")(action);
-  };
+  const $element = D.querySelector(`#${event.target.id}`);
+  const upvotes = $element.getAttribute("upvotes");
 
-  update({ type: ASYNC_STATES.LOADING });
+  $element.innerHTML = `${upvotes} &#9650; Upvoting...`;
   try {
     const result = await upvoteCommentToAPI({
       commentId,
       userId: state.selectedUser.userId,
     });
-    update({
-      type: ASYNC_STATES.DATA,
-      payload: {
-        targetId: event.target.id,
-        updatedUpvotes: result.updatedUpvotes,
-      },
-    });
+    $element.setAttribute("upvotes", `${result.updatedUpvotes}`);
+    $element.innerHTML = `${result.updatedUpvotes} &#9650; Upvote`;
   } catch (error) {
-    update({ type: ASYNC_STATES.ERROR, payload: error });
+    $element.innerHTML = `${upvotes} &#9650; Upvote`;
+    _displayNotification(error, "error");
   }
 };
 
