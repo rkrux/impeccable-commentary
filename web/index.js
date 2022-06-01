@@ -1,5 +1,4 @@
 // TODOs:
-// CommentUpvote each to have individual state, instead of one global state for all comment upvotes
 // Try Again button for API failures?
 // Remove Mock APIs
 // Split script into multiple files and modules?
@@ -14,34 +13,41 @@ const API_TIMEOUT_MS = 2990,
     ERROR: 2,
   };
 let storedUsers = [
-  { userId: 1, userName: "Rob Hope" },
-  { userId: 2, userName: "Cameron Lawrence" },
-  { userId: 3, userName: "Shawn Williams" },
-  { userId: 4, userName: "Michael Adams" },
-  { userId: 5, userName: "Jane Austin" },
-  { userId: 6, userName: "Alicia Schumacher" },
+  { userId: 1, userName: "Martin Balsam" },
+  { userId: 2, userName: "John Fiedler" },
+  { userId: 3, userName: "Lee J Cobb" },
+  { userId: 4, userName: "E G Marshall" },
+  { userId: 5, userName: "Jack Klugman" },
+  { userId: 6, userName: "Edward Bins" },
   { userId: 7, userName: "Bridget Stacey" },
+  { userId: 8, userName: "Henry Fonda" },
+  { userId: 9, userName: "Joseph Sweeney" },
+  { userId: 10, userName: "Ed Begley" },
+  { userId: 11, userName: "George Voskovec" },
+  { userId: 12, userName: "Robert Webber" },
 ];
 let storedComments = [
   {
     commentId: 2,
-    userId: storedUsers[1].userId,
-    userName: storedUsers[1].userName,
+    userId: storedUsers[8].userId,
+    userName: storedUsers[8].userName,
     createdAt: Date.now() - 1200000,
     commentText:
-      "Integer eget nulla sodales, mattis ante mattis, ullamcorper velit. Praesent vitae neque tristique,\
-      accumsan arcu sit amet, ullamcorper risus. Donec facilisis nulla ipsum, vitae vehicula nisi sollicitudin vitae. ",
+      "It takes a great deal of courage to stand alone even if you believe in something very strongly.",
     upvotes: 10,
   },
   {
     commentId: 1,
-    userId: storedUsers[0].userId,
-    userName: storedUsers[0].userName,
+    userId: storedUsers[7].userId,
+    userName: storedUsers[7].userName,
     createdAt: Date.now() - 14400000,
     commentText:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ullamcorper turpis nisl, vitae\
-      pretium quam lacinia vitae. Pellentesque posuere at tellus nec euismod.",
-    upvotes: 5,
+      "Nine of us now seem to feel that the defendant is innocent, but we're just gambling on probabilities.\
+      We may be wrong. We may be trying to return a guilty man to the community. No one can really know.\
+      But we have a reasonable doubt, and this is a safeguard that has enormous value in our system.\
+      No jury can declare a man guilty unless it's sure. We nine can't understand how you three are still so sure.\
+      Maybe you can tell us.",
+    upvotes: 8,
   },
 ];
 const getRandomNumber = (maxValue) => {
