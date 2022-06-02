@@ -46,6 +46,8 @@ const handleCommentSubmit = async () => {
   await submitComment(commentText);
   if (globalState.commentSubmit.error === null) {
     $commentInput.value = "";
+    // Select a new user randomly after every successful comment submission
+    // to boost interactivity.
     selectNewUser();
   }
 };

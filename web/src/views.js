@@ -175,7 +175,8 @@ const commentSubmitLoadingView = () => {
 };
 const commentSubmitSuccessView = () => {
   $commentSubmit.textContent = "Comment";
-  displayNotification(globalState.commentSubmit.data, "success"); // Consider removing this to reduce UX interactions
+  // Consider removing this to reduce UX interactions
+  displayNotification(globalState.commentSubmit.data, "success");
 };
 const commentSubmitErrorView = () => {
   $commentSubmit.textContent = "Comment";
