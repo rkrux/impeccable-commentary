@@ -27,11 +27,7 @@ const displayNotification = (message, className) => {
     $notification.classList.remove(className);
   }, MESSAGE_TIMEOUT_MS);
 };
-const buildNotification = (stateType, asyncStateType, className) => () => {
-  // This function needs to be a closure since the state values need to be
-  // picked up during run-time. Only state independent data is taken as input.
-  displayNotification(globalState[stateType][asyncStateType], className);
-};
+
 const buildComment = (comment) => {
   const { commentId, commentText, userName, createdAt, upvotes } = comment;
 
@@ -127,7 +123,7 @@ const buildComment = (comment) => {
 
 // List User Views
 const userListLoadingView = () => {
-  $appInitialization.textContent = "Initializing App...";
+  $appInitialization.textContent = "Initializing Impeccable Commentary...";
 };
 const userListSuccessView = () => {
   $appInitialization.className = "hidden";
@@ -173,11 +169,11 @@ const commentSubmitLoadingView = () => {
 };
 const commentSubmitSuccessView = () => {
   $commentSubmit.textContent = "Comment";
-  buildNotification("commentSubmit", "data", "success")(); // Consider removing this to reduce UX interactions
+  displayNotification(globalState.commentSubmit.data, "success"); // Consider removing this to reduce UX interactions
 };
 const commentSubmitErrorView = () => {
   $commentSubmit.textContent = "Comment";
-  buildNotification("commentSubmit", "error", "error")();
+  displayNotification(globalState.commentSubmit.error, "error");
 };
 
 const viewBuilders = {

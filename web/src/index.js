@@ -14,6 +14,7 @@ import {
 import { getViewBuilderByStateType } from "./views";
 import "./style.css";
 
+const DEFAULT_USER = { userId: 101, userName: "John Doe" };
 const selectNewUser = () => {
   if (globalState.userList.data !== null) {
     globalState.selectedUser =
@@ -21,9 +22,10 @@ const selectNewUser = () => {
         getRandomNumber(globalState.userList.data.length - 1)
       ];
   } else {
-    globalState.selectedUser = { userId: 101, userName: "John Doe" }; // Default User
+    // Not stopping the app in case loading users fails,
+    // continuing with default user instead
+    globalState.selectedUser = DEFAULT_USER;
   }
-
   $userDisplayPic.textContent = globalState.selectedUser.userName.charAt(0);
 };
 
