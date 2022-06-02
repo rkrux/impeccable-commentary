@@ -2,6 +2,8 @@
 // Try Again button for API failures?
 // Split script into multiple modules and add a bundler
 
+import "./style.css";
+
 // Constants and Helpers
 const API_TIMEOUT_MS = 990,
   API_MAX_THRESHOLD_MS = 1000;
