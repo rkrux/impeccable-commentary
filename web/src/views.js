@@ -8,31 +8,13 @@ import {
   $commentLoader,
   $commentListError,
   $notification,
+  getCommentUpvoteElementById,
 } from "./domSelectors";
 import { globalState } from "./states";
 import { getFormattedDuration } from "./utils";
 import { upvoteCommentToAPI } from "./apis";
 
 const MESSAGE_TIMEOUT_MS = 4000;
-
-// Migrate to React
-const upvoteComment = async (event, commentId) => {
-  const $element = D.querySelector(`#${event.target.id}`);
-  const upvotes = $element.getAttribute("upvotes");
-
-  $element.innerHTML = `${upvotes} &#9650; Upvoting...`;
-  try {
-    const result = await upvoteCommentToAPI({
-      commentId,
-      userId: globalState.selectedUser.userId,
-    });
-    $element.setAttribute("upvotes", `${result.updatedUpvotes}`);
-    $element.innerHTML = `${result.updatedUpvotes} &#9650; Upvote`;
-  } catch (error) {
-    $element.innerHTML = `${upvotes} &#9650; Upvote`;
-    displayNotification(error, "error");
-  }
-};
 
 const displayNotification = (message, className) => {
   $notification.innerHTML = "";
@@ -91,15 +73,32 @@ const buildComment = (comment) => {
       })()
     );
     $element.appendChild(
+      // Migrate to React
       (function () {
         const $element = D.createElement("button");
         $element.id = `comment-${commentId}-upvote`;
         $element.className = "commentAction";
+        $element.innerHTML = `${upvotes} &#9650; Upvote`;
         $element.setAttribute("upvotes", `${upvotes}`);
         $element.addEventListener("click", (event) =>
-          upvoteComment(event, commentId)
+          (async function upvoteComment() {
+            const $element = getCommentUpvoteElementById(event.target.id);
+            const upvotes = $element.getAttribute("upvotes");
+
+            $element.innerHTML = `${upvotes} &#9650; Upvoting...`;
+            try {
+              const result = await upvoteCommentToAPI({
+                commentId,
+                userId: globalState.selectedUser.userId,
+              });
+              $element.setAttribute("upvotes", `${result.updatedUpvotes}`);
+              $element.innerHTML = `${result.updatedUpvotes} &#9650; Upvote`;
+            } catch (error) {
+              $element.innerHTML = `${upvotes} &#9650; Upvote`;
+              displayNotification(error, "error");
+            }
+          })()
         );
-        $element.innerHTML = `${upvotes} &#9650; Upvote`;
         return $element;
       })()
     );

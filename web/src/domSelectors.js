@@ -8,3 +8,4 @@ export const $commentList = D.querySelector("#commentList");
 export const $commentLoader = D.querySelector("#commentLoader");
 export const $commentListError = D.querySelector("#commentListError");
 export const $notification = D.querySelector("#notification");
+export const getCommentUpvoteElementById = (id) => D.querySelector(`#${id}`);
