@@ -113,7 +113,7 @@ body {
 }
 
 #commentListError {
-  color: rgb(204, 188, 194);
+  color: palevioletred;
   font-size: large;
 }
 
