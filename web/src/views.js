@@ -79,9 +79,10 @@ const buildComment = (comment) => {
         $element.addEventListener("click", (event) =>
           (async function upvoteComment() {
             const $element = getCommentUpvoteElementById(event.target.id);
-            const upvotes = $element.getAttribute("upvotes");
 
-            $element.innerHTML = `${upvotes} &#9650; Upvoting...`;
+            $element.innerHTML = `${$element.getAttribute(
+              "upvotes"
+            )} &#9650; Upvoting...`;
             try {
               const result = await upvoteCommentToAPI({
                 commentId,
@@ -90,7 +91,12 @@ const buildComment = (comment) => {
               $element.setAttribute("upvotes", `${result.updatedUpvotes}`);
               $element.innerHTML = `${result.updatedUpvotes} &#9650; Upvote`;
             } catch (error) {
-              $element.innerHTML = `${upvotes} &#9650; Upvote`;
+              // Retrieving the value directly from getAttribute is necessary
+              // (& not keeping it stored in a variable), otherwise it leads to incorrect
+              // view update in case any one of the multiple upvotes sent together fails.
+              $element.innerHTML = `${$element.getAttribute(
+                "upvotes"
+              )} &#9650; Upvote`;
               displayNotification(error, "error");
             }
           })()
