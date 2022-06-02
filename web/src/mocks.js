@@ -1,4 +1,4 @@
-import { getRandomNumber } from "../constants";
+import { getRandomNumber } from "./utils";
 
 const API_TIMEOUT_MS = 990,
   API_MAX_THRESHOLD_MS = 1000;
