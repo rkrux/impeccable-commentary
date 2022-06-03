@@ -21,3 +21,12 @@ const app = express();
 app.listen(PORT, () => {
   console.log(`Listening on port: ${PORT}`);
 });
+
+/**
+ * TODOs
+ * - Migrate and seed comments, commentUpvotes
+ * - listUsers API
+ * - submitComment API
+ * - upvoteComment API
+ * - listComments API
+ */
