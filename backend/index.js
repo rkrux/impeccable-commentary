@@ -23,18 +23,23 @@ app.listen(PORT, () => {
   console.log(`Listening on port: ${PORT}`);
 });
 
+const buildError = (res, error) => {
+  res.status(500);
+  res.json({ error });
+};
+
 app.get("/users", (_, res) => {
   knex("userss")
     .select("userId", "userName")
     .then((users) => res.json({ users }))
     .catch((error) => {
-      res.status(500);
-      res.json({ error });
+      buildError(res, error);
     });
 });
 
 /**
  * TODOs
+ * - Proper Error handling
  * - submitComment API
  * - upvoteComment API
  * - listComments API
