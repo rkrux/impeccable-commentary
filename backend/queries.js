@@ -1,12 +1,12 @@
-import knex from "./knex/knex.js";
+import knex from './knex/knex.js';
 
 async function testDBConnection() {
   return knex
-    .raw("select 1+1 as result")
-    .then(() => console.log("Connected to database"))
+    .raw('select 1+1 as result')
+    .then(() => console.log('Connected to database'))
     .catch((err) => {
       console.log(
-        "[Fatal] Failed to establish connection to database! Exiting..."
+        '[Fatal] Failed to establish connection to database! Exiting...'
       );
       console.log(err);
       process.exit(1);
@@ -14,17 +14,17 @@ async function testDBConnection() {
 }
 
 async function getUsers() {
-  return await knex("users").select("userId", "userName");
+  return await knex('users').select('userId', 'userName');
 }
 
 async function getComments() {
-  return await knex("comments")
-    .join("users", "comments.userId", "=", "users.userId")
+  return await knex('comments')
+    .join('users', 'comments.userId', '=', 'users.userId')
     .select(
-      "comments.commentId",
-      "comments.commentText",
-      "comments.userId",
-      "users.userName"
+      'comments.commentId',
+      'comments.commentText',
+      'comments.userId',
+      'users.userName'
     );
 }
 
@@ -34,4 +34,18 @@ async function getUpvotesByComment() {
   );
 }
 
-export { testDBConnection, getUsers, getComments, getUpvotesByComment };
+async function addComment({ commentText, userId, createdAt }) {
+  await knex('comments').insert({
+    commentText,
+    userId,
+    createdAt: createdAt ?? new Date(Date.now()).toISOString(),
+  });
+}
+
+export {
+  testDBConnection,
+  getUsers,
+  getComments,
+  getUpvotesByComment,
+  addComment,
+};

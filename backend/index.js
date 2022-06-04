@@ -1,11 +1,12 @@
-import express from "express";
-import "dotenv/config";
+import express from 'express';
+import 'dotenv/config';
 import {
   testDBConnection,
   getUsers,
   getComments,
   getUpvotesByComment,
-} from "./queries.js";
+  addComment,
+} from './queries.js';
 
 testDBConnection();
 
@@ -13,22 +14,22 @@ const PORT = process.env.PORT || 3001;
 const app = express();
 app.use(express.json());
 
-const buildError = (res, error) => {
+const buildError = (api, res, error) => {
+  console.log(`Error in ${api}: ${error}`);
   res.status(500);
   res.json({ error });
 };
 
-app.get("/users", async (_, res) => {
+app.get('/users', async (_, res) => {
   try {
     const users = await getUsers();
     res.json({ users });
   } catch (error) {
-    console.log("Error in /users: ", error);
-    buildError(res, error);
+    buildError('/users', res, error);
   }
 });
 
-app.get("/comments", async (_, res) => {
+app.get('/comments', async (_, res) => {
   try {
     const comments = await getComments();
     const upvotesByCommentArray = await getUpvotesByComment();
@@ -44,8 +45,16 @@ app.get("/comments", async (_, res) => {
     });
     res.json({ comments: commentsWithUpvotes });
   } catch (error) {
-    console.log("Error in /comments: ", error);
-    buildError(res, error);
+    buildError('/comments', res, error);
+  }
+});
+
+app.post('/comment', async (req, res) => {
+  try {
+    await addComment(req.body);
+    return res.json({});
+  } catch (error) {
+    buildError('/comment', res, error);
   }
 });
 
@@ -56,6 +65,5 @@ app.listen(PORT, () => {
 /**
  * TODOs
  * - Proper Error handling
- * - submitComment API
  * - upvoteComment API
  */
