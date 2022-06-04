@@ -37,7 +37,8 @@ app.get('/comments', async (_, res) => {
     const comments = await getComments();
     const upvotesByCommentArray = await getUpvotesByComment();
     const upvotesByComment = upvotesByCommentArray.rows.reduce(
-      (acc, val) => ({ ...acc, [val.commentId]: val.count }),
+      //BigInt type is returned as string in query results: https://github.com/knex/knex/issues/387
+      (acc, val) => ({ ...acc, [val.commentId]: Number(val.count) }),
       {}
     );
     const commentsWithUpvotes = comments.map((comment) => {
