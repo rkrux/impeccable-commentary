@@ -1,9 +1,11 @@
+import envConfig from '../env.config';
+
 const requestHeaders = {
   Accept: 'application/json',
   'Content-Type': 'application/json',
 };
 
-const BASE_URL = 'http://localhost:3001';
+const BASE_API_URL = envConfig.env.BASE_API_URL;
 
 const apiConfig = {
   getUsers: {
@@ -27,7 +29,7 @@ const apiConfig = {
 const api =
   ({ path, method, reqBody }) =>
   async () => {
-    const response = await fetch(`${BASE_URL}${path}`, {
+    const response = await fetch(`${BASE_API_URL}${path}`, {
       method,
       headers: requestHeaders,
       body: method === 'POST' && reqBody ? JSON.stringify(reqBody) : undefined,
