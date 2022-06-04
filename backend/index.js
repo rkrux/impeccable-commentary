@@ -13,6 +13,7 @@ import {
 
 testDBConnection();
 
+// Express Tweaks
 const PORT = process.env.PORT || 3001;
 const app = express();
 app.use(express.json());
@@ -24,7 +25,8 @@ const buildErrorResponse = (api, res, error, errorCode = 500) => {
   res.json({ error });
 };
 
-app.get('/users', async (_, res) => {
+// Endpoints
+app.get('/getUsers', async (_, res) => {
   try {
     const users = await getUsers();
     res.json({ users });
@@ -33,7 +35,7 @@ app.get('/users', async (_, res) => {
   }
 });
 
-app.get('/comments', async (_, res) => {
+app.get('/getComments', async (_, res) => {
   try {
     const comments = await getComments();
     const upvotesByCommentArray = await getUpvotesGroupedByCommentId();
@@ -54,7 +56,7 @@ app.get('/comments', async (_, res) => {
   }
 });
 
-app.post('/comment', async (req, res) => {
+app.post('/addComment', async (req, res) => {
   const { commentText, userId } = req.body;
 
   // Req Param Validation
@@ -76,7 +78,7 @@ app.post('/comment', async (req, res) => {
   }
 });
 
-app.post('/upvote', async (req, res) => {
+app.post('/upvoteComment', async (req, res) => {
   const { commentId, userId } = req.body;
 
   // Req Param Validation
