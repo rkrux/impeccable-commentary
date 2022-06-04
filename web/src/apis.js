@@ -7,19 +7,19 @@ const BASE_URL = 'http://localhost:3001';
 
 const apiConfig = {
   getUsers: {
-    path: '/users',
+    path: '/getUsers',
     method: 'GET',
   },
   getComments: {
-    path: '/comments',
+    path: '/getComments',
     method: 'GET',
   },
   addComment: {
-    path: '/comment',
+    path: '/addComment',
     method: 'POST',
   },
-  addUpvote: {
-    path: '/upvote',
+  upvoteComment: {
+    path: '/upvoteComment',
     method: 'POST',
   },
 };
@@ -37,14 +37,14 @@ const api =
 
 const getUsersFromAPI = api(apiConfig.getUsers);
 const getCommentsFromAPI = api(apiConfig.getComments);
-const postCommentToAPI = (reqBody) =>
+const addCommentToAPI = (reqBody) =>
   api({ ...apiConfig.addComment, reqBody })();
 const upvoteCommentToAPI = (reqBody) =>
-  api({ ...apiConfig.addUpvote, reqBody })();
+  api({ ...apiConfig.upvoteComment, reqBody })();
 
 export {
   getUsersFromAPI,
   getCommentsFromAPI,
-  postCommentToAPI,
+  addCommentToAPI,
   upvoteCommentToAPI,
 };

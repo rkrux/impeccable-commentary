@@ -3,7 +3,7 @@
     Try Again button for API failures?
 */
 
-import { getUsersFromAPI, getCommentsFromAPI, postCommentToAPI } from './apis';
+import { getUsersFromAPI, getCommentsFromAPI, addCommentToAPI } from './apis';
 import { $commentSubmit, $commentInput, $userDisplayPic } from './domSelectors';
 import { getRandomNumber } from './utils';
 import {
@@ -89,7 +89,7 @@ const submitComment = async (commentText) => {
 
   update({ type: ASYNC_STATES.LOADING });
   try {
-    await postCommentToAPI({
+    await addCommentToAPI({
       userId: globalState.selectedUser.userId,
       commentText,
     });
