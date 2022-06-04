@@ -1,21 +1,21 @@
-import { getRandomNumber } from "./utils";
+import { getRandomNumber } from './utils';
 
 const API_TIMEOUT_MS = 990,
   API_MAX_THRESHOLD_MS = 1000;
 
 let mockStoredUser = [
-  { userId: 1, userName: "Martin Balsam" },
-  { userId: 2, userName: "John Fiedler" },
-  { userId: 3, userName: "Lee J Cobb" },
-  { userId: 4, userName: "E G Marshall" },
-  { userId: 5, userName: "Jack Klugman" },
-  { userId: 6, userName: "Edward Bins" },
-  { userId: 7, userName: "Bridget Stacey" },
-  { userId: 8, userName: "Henry Fonda" },
-  { userId: 9, userName: "Joseph Sweeney" },
-  { userId: 10, userName: "Ed Begley" },
-  { userId: 11, userName: "George Voskovec" },
-  { userId: 12, userName: "Robert Webber" },
+  { userId: 1, userName: 'Martin Balsam' },
+  { userId: 2, userName: 'John Fiedler' },
+  { userId: 3, userName: 'Lee J Cobb' },
+  { userId: 4, userName: 'E G Marshall' },
+  { userId: 5, userName: 'Jack Klugman' },
+  { userId: 6, userName: 'Edward Bins' },
+  { userId: 7, userName: 'Bridget Stacey' },
+  { userId: 8, userName: 'Henry Fonda' },
+  { userId: 9, userName: 'Joseph Sweeney' },
+  { userId: 10, userName: 'Ed Begley' },
+  { userId: 11, userName: 'George Voskovec' },
+  { userId: 12, userName: 'Robert Webber' },
 ];
 let mockStoredComments = [
   {
@@ -24,7 +24,7 @@ let mockStoredComments = [
     userName: mockStoredUser[8].userName,
     createdAt: Date.now() - 1200000,
     commentText:
-      "It takes a great deal of courage to stand alone even if you believe in something very strongly.",
+      'It takes a great deal of courage to stand alone even if you believe in something very strongly.',
     upvotes: 10,
   },
   {
@@ -42,6 +42,7 @@ let mockStoredComments = [
   },
 ];
 
+// Mock BE APIs to be used until BE integration is complete
 const mockGetUsersFromAPI = async () => {
   return new Promise((resolve, reject) => {
     const randomMs = getRandomNumber(1000);
@@ -80,7 +81,7 @@ const mockPostCommentToAPI = async (commentData) => {
           },
           ...mockStoredComments,
         ];
-        resolve("Submitted");
+        resolve('Submitted');
       } else {
         reject(`Unable to submit comment, time: ${randomMs}ms`);
       }
@@ -105,11 +106,4 @@ const mockUpvoteCommentToAPI = async ({ commentId, userId }) => {
       }
     }, randomMs);
   });
-};
-
-export {
-  mockGetUsersFromAPI,
-  mockGetCommentsFromAPI,
-  mockPostCommentToAPI,
-  mockUpvoteCommentToAPI,
 };

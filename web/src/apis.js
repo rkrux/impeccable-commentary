@@ -1,9 +1,3 @@
-import {
-  mockPostCommentToAPI,
-  mockGetCommentsFromAPI,
-  mockUpvoteCommentToAPI,
-} from './mocks';
-
 const requestHeaders = {
   Accept: 'application/json',
   'Content-Type': 'application/json',
@@ -36,7 +30,7 @@ const api =
     const response = await fetch(`${BASE_URL}${path}`, {
       method,
       headers: requestHeaders,
-      body: JSON.stringify(reqBody),
+      body: method === 'POST' && reqBody ? JSON.stringify(reqBody) : undefined,
     });
     return response.json();
   };
