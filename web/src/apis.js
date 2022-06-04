@@ -31,19 +31,22 @@ const apiConfig = {
 };
 
 const api =
-  ({ path, method }) =>
+  ({ path, method, reqBody }) =>
   async () => {
     const response = await fetch(`${BASE_URL}${path}`, {
       method,
       headers: requestHeaders,
+      body: JSON.stringify(reqBody),
     });
     return response.json();
   };
 
 const getUsersFromAPI = api(apiConfig.getUsers);
 const getCommentsFromAPI = api(apiConfig.getComments);
-const postCommentToAPI = mockPostCommentToAPI;
-const upvoteCommentToAPI = mockUpvoteCommentToAPI;
+const postCommentToAPI = (reqBody) =>
+  api({ ...apiConfig.addComment, reqBody })();
+const upvoteCommentToAPI = (reqBody) =>
+  api({ ...apiConfig.addUpvote, reqBody })();
 
 export {
   getUsersFromAPI,

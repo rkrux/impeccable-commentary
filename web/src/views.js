@@ -88,8 +88,8 @@ const buildComment = (comment) => {
                 commentId,
                 userId: globalState.selectedUser.userId,
               });
-              $element.setAttribute('upvotes', `${result.updatedUpvotes}`);
-              $element.innerHTML = `${result.updatedUpvotes} &#9650; Upvote`;
+              $element.setAttribute('upvotes', `${result.upvotes}`);
+              $element.innerHTML = `${result.upvotes} &#9650; Upvote`;
             } catch (error) {
               // Retrieving the value directly from getAttribute is necessary
               // (& not keeping it stored in a variable), otherwise it leads to incorrect

@@ -5,7 +5,8 @@ import {
   testDBConnection,
   getUsers,
   getComments,
-  getUpvotesByComment,
+  getUpvotesGroupedByCommentId,
+  getUpvotesByCommentId,
   addComment,
   addUpvote,
 } from './queries.js';
@@ -35,7 +36,7 @@ app.get('/users', async (_, res) => {
 app.get('/comments', async (_, res) => {
   try {
     const comments = await getComments();
-    const upvotesByCommentArray = await getUpvotesByComment();
+    const upvotesByCommentArray = await getUpvotesGroupedByCommentId();
     const upvotesByComment = upvotesByCommentArray.rows.reduce(
       //BigInt type is returned as string in query results: https://github.com/knex/knex/issues/387
       (acc, val) => ({ ...acc, [val.commentId]: Number(val.count) }),
@@ -65,7 +66,8 @@ app.post('/comment', async (req, res) => {
 app.post('/upvote', async (req, res) => {
   try {
     await addUpvote(req.body);
-    return res.json({});
+    const result = await getUpvotesByCommentId(req.body.commentId);
+    return res.json({ upvotes: Number(result.rows[0].count) });
   } catch (error) {
     buildError('post/upvote', res, error);
   }
@@ -74,3 +76,5 @@ app.post('/upvote', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Listening on port: ${PORT}`);
 });
+
+// TODO: Missing reqParams checks => validations

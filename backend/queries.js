@@ -29,9 +29,16 @@ async function getComments() {
     );
 }
 
-async function getUpvotesByComment() {
+async function getUpvotesGroupedByCommentId() {
   return await knex.raw(
     'select "commentId", count("userId") from "commentUpvotes" group by "commentId"'
+  );
+}
+
+async function getUpvotesByCommentId(commentId) {
+  return await knex.raw(
+    'select count("userId") from "commentUpvotes" where "commentId" = ?',
+    [commentId]
   );
 }
 
@@ -55,7 +62,8 @@ export {
   testDBConnection,
   getUsers,
   getComments,
-  getUpvotesByComment,
+  getUpvotesGroupedByCommentId,
+  getUpvotesByCommentId,
   addComment,
   addUpvote,
 };

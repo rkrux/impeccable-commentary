@@ -91,7 +91,6 @@ const submitComment = async (commentText) => {
   try {
     await postCommentToAPI({
       userId: globalState.selectedUser.userId,
-      userName: globalState.selectedUser.userName,
       commentText,
     });
     update({ type: ASYNC_STATES.DATA, payload: 'Submitted comment!' });
