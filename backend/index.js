@@ -18,9 +18,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const buildError = (api, res, error) => {
+const buildErrorResponse = (api, res, error, errorCode = 500) => {
   console.log(`Error in ${api}: ${error}`);
-  res.status(500);
+  res.status(errorCode);
   res.json({ error });
 };
 
@@ -29,7 +29,7 @@ app.get('/users', async (_, res) => {
     const users = await getUsers();
     res.json({ users });
   } catch (error) {
-    buildError('get/users', res, error);
+    buildErrorResponse('get/users', res, error);
   }
 });
 
@@ -50,31 +50,55 @@ app.get('/comments', async (_, res) => {
     });
     res.json({ comments: commentsWithUpvotes });
   } catch (error) {
-    buildError('get/comments', res, error);
+    buildErrorResponse('get/comments', res, error);
   }
 });
 
 app.post('/comment', async (req, res) => {
+  const { commentText, userId } = req.body;
+
+  // Req Param Validation
+  if (!commentText || !userId) {
+    buildErrorResponse(
+      'post/comment',
+      res,
+      'One or more request params missing: commentText | userId',
+      400
+    );
+    return;
+  }
+
   try {
     await addComment(req.body);
     return res.json({});
   } catch (error) {
-    buildError('post/comment', res, error);
+    buildErrorResponse('post/comment', res, error);
   }
 });
 
 app.post('/upvote', async (req, res) => {
+  const { commentId, userId } = req.body;
+
+  // Req Param Validation
+  if (!commentId || !userId) {
+    buildErrorResponse(
+      'post/upvote',
+      res,
+      'One or more request params missing: commentId | userId',
+      400
+    );
+    return;
+  }
+
   try {
     await addUpvote(req.body);
-    const result = await getUpvotesByCommentId(req.body.commentId);
+    const result = await getUpvotesByCommentId(commentId);
     return res.json({ upvotes: Number(result.rows[0].count) });
   } catch (error) {
-    buildError('post/upvote', res, error);
+    buildErrorResponse('post/upvote', res, error);
   }
 });
 
 app.listen(PORT, () => {
   console.log(`Listening on port: ${PORT}`);
 });
-
-// TODO: Missing reqParams checks => validations

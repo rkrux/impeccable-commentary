@@ -26,7 +26,8 @@ async function getComments() {
       'comments.userId',
       'comments.createdAt',
       'users.userName'
-    );
+    )
+    .orderBy('comments.createdAt', 'desc');
 }
 
 async function getUpvotesGroupedByCommentId() {
