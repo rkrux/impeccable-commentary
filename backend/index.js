@@ -6,6 +6,7 @@ import {
   getComments,
   getUpvotesByComment,
   addComment,
+  addUpvote,
 } from './queries.js';
 
 testDBConnection();
@@ -25,7 +26,7 @@ app.get('/users', async (_, res) => {
     const users = await getUsers();
     res.json({ users });
   } catch (error) {
-    buildError('/users', res, error);
+    buildError('get/users', res, error);
   }
 });
 
@@ -45,7 +46,7 @@ app.get('/comments', async (_, res) => {
     });
     res.json({ comments: commentsWithUpvotes });
   } catch (error) {
-    buildError('/comments', res, error);
+    buildError('get/comments', res, error);
   }
 });
 
@@ -54,7 +55,16 @@ app.post('/comment', async (req, res) => {
     await addComment(req.body);
     return res.json({});
   } catch (error) {
-    buildError('/comment', res, error);
+    buildError('post/comment', res, error);
+  }
+});
+
+app.post('/upvote', async (req, res) => {
+  try {
+    await addUpvote(req.body);
+    return res.json({});
+  } catch (error) {
+    buildError('post/upvote', res, error);
   }
 });
 

@@ -42,10 +42,19 @@ async function addComment({ commentText, userId, createdAt }) {
   });
 }
 
+async function addUpvote({ commentId, userId, createdAt }) {
+  await knex('commentUpvotes').insert({
+    commentId,
+    userId,
+    createdAt: createdAt ?? new Date(Date.now()).toISOString(),
+  });
+}
+
 export {
   testDBConnection,
   getUsers,
   getComments,
   getUpvotesByComment,
   addComment,
+  addUpvote,
 };
