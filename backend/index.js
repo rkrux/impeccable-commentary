@@ -43,7 +43,7 @@ app.get('/comments', async (_, res) => {
     const commentsWithUpvotes = comments.map((comment) => {
       return {
         ...comment,
-        upvotes: upvotesByComment[comment.commentId],
+        upvotes: upvotesByComment[comment.commentId] ?? 0,
       };
     });
     res.json({ comments: commentsWithUpvotes });

@@ -24,6 +24,7 @@ async function getComments() {
       'comments.commentId',
       'comments.commentText',
       'comments.userId',
+      'comments.createdAt',
       'users.userName'
     );
 }
