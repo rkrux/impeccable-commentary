@@ -7,7 +7,6 @@ export async function seed(knex) {
   await knex("comments").del();
   await knex("comments").insert([
     {
-      commentId: 1,
       commentText:
         "Nine of us now seem to feel that the defendant is innocent, but we're just gambling on probabilities. \
         We may be wrong. We may be trying to return a guilty man to the community. No one can really know. \
@@ -17,7 +16,6 @@ export async function seed(knex) {
       userId: 8,
     },
     {
-      commentId: 2,
       commentText:
         "It takes a great deal of courage to stand alone even if you believe in something very strongly.",
       userId: 9,
