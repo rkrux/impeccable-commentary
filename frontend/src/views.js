@@ -12,7 +12,7 @@ import {
 import { globalState } from './states';
 import { getFormattedDuration } from './utils';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import Upvote from './Upvote.jsx';
 
 const MESSAGE_TIMEOUT_MS = 4000;
@@ -76,10 +76,8 @@ const buildComment = (comment) => {
     $element.appendChild(
       (function () {
         const $element = D.createElement('span');
-        ReactDOM.render(
-          <Upvote commentId={commentId} upvotes={upvotes} />,
-          $element
-        );
+        const reactElement = ReactDOM.createRoot($element);
+        reactElement.render(<Upvote commentId={commentId} upvotes={upvotes} />);
         return $element;
       })()
     );
