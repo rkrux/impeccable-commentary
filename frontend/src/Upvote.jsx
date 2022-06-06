@@ -7,7 +7,7 @@ const Upvote = ({ commentId, upvotes: originalUpvotes }) => {
   const [upvotes, setUpvotes] = useState(originalUpvotes);
   const [loading, setLoading] = useState(false);
 
-  const upvotesComment = async () => {
+  const upvoteComment = async () => {
     setLoading(true);
     try {
       const result = await upvoteCommentToAPI({
@@ -26,7 +26,7 @@ const Upvote = ({ commentId, upvotes: originalUpvotes }) => {
     <button
       id={`comment-${commentId}-upvote`}
       className="commentAction"
-      onClick={upvotesComment}
+      onClick={upvoteComment}
       disabled={loading}
     >
       {upvotes}&#9650;{loading ? ` Upvoting...` : ` Upvote`}

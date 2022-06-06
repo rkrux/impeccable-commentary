@@ -17,13 +17,17 @@ import Upvote from './Upvote.jsx';
 
 const MESSAGE_TIMEOUT_MS = 4000;
 
+let previousNotificationTimeoutId = 0;
 const displayNotification = (message, className) => {
   $notification.innerHTML = '';
   $notification.appendChild(D.createTextNode(message));
   $notification.classList.add(className);
   $notification.classList.remove('hidden');
 
-  setTimeout(() => {
+  // Clear the previous timeout and set a new one so that the latest message
+  // is shown for an appropriate amount of time
+  clearTimeout(previousNotificationTimeoutId);
+  previousNotificationTimeoutId = setTimeout(() => {
     $notification.classList.add('hidden');
     $notification.classList.remove(className);
   }, MESSAGE_TIMEOUT_MS);
