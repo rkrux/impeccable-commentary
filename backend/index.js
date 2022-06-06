@@ -1,4 +1,6 @@
 import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import cors from 'cors';
 import 'dotenv/config';
 import {
@@ -13,11 +15,28 @@ import {
 
 testDBConnection();
 
-// Express Tweaks
+// Express Configurations
 const PORT = process.env.PORT || 3001;
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// Web Sockets Configurations
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  serveClient: false,
+  cors: {
+    origin: '*',
+  },
+});
+
+io.on('connection', (socket) => {
+  console.log(`A user is connected: ${socket.id}`);
+
+  socket.on('disconnect', () => {
+    console.log(`socket ${socket.id} disconnected`);
+  });
+});
 
 const buildErrorResponse = (api, res, error, errorCode = 500) => {
   console.log(`Error in ${api}: ${error}`);
@@ -95,12 +114,17 @@ app.post('/upvoteComment', async (req, res) => {
   try {
     await addUpvote(req.body);
     const result = await getUpvotesByCommentId(commentId);
-    return res.json({ upvotes: Number(result.rows[0].count) });
+    const upvotes = Number(result.rows[0].count);
+    io.emit('upvote-comment', {
+      commentId,
+      upvotes,
+    });
+    return res.json({ upvotes });
   } catch (error) {
     buildErrorResponse('post/upvote', res, error);
   }
 });
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`Listening on port: ${PORT}`);
 });

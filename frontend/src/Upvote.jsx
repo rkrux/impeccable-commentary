@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
+import envConfig from '../env.config';
 import { upvoteCommentToAPI } from './apis';
 import { globalState } from './states';
 import { displayNotification } from './views';
@@ -21,6 +23,24 @@ const Upvote = ({ commentId, upvotes: originalUpvotes }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const socket = io(envConfig.env.WEB_SOCKET_URL);
+
+    socket.on('connnection', () => {
+      console.log('connected to server');
+    });
+
+    socket.on('upvote-comment', ({ commentId: updatedCommentId, upvotes }) => {
+      if (commentId === updatedCommentId) {
+        setUpvotes(upvotes);
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Socket disconnecting');
+    });
+  }, []);
 
   return (
     <button
