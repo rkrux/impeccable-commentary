@@ -8,11 +8,12 @@ import {
   $commentLoader,
   $commentListError,
   $notification,
-  getCommentUpvoteElementById,
 } from './domSelectors';
 import { globalState } from './states';
 import { getFormattedDuration } from './utils';
-import { upvoteCommentToAPI } from './apis';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import Upvote from './Upvote.jsx';
 
 const MESSAGE_TIMEOUT_MS = 4000;
 
@@ -69,37 +70,11 @@ const buildComment = (comment) => {
       })()
     );
     $element.appendChild(
-      // Migrate to React
       (function () {
-        const $element = D.createElement('button');
-        $element.id = `comment-${commentId}-upvote`;
-        $element.className = 'commentAction';
-        $element.innerHTML = `${upvotes} &#9650; Upvote`;
-        $element.setAttribute('upvotes', `${upvotes}`);
-        $element.addEventListener('click', (event) =>
-          (async function upvoteComment() {
-            const $element = getCommentUpvoteElementById(event.target.id);
-
-            $element.innerHTML = `${$element.getAttribute(
-              'upvotes'
-            )} &#9650; Upvoting...`;
-            try {
-              const result = await upvoteCommentToAPI({
-                commentId,
-                userId: globalState.selectedUser.userId,
-              });
-              $element.setAttribute('upvotes', `${result.upvotes}`);
-              $element.innerHTML = `${result.upvotes} &#9650; Upvote`;
-            } catch (error) {
-              // Retrieving the value directly from getAttribute is necessary
-              // (& not keeping it stored in a variable), otherwise it leads to incorrect
-              // view update in case any one of the multiple upvotes sent together fails.
-              $element.innerHTML = `${$element.getAttribute(
-                'upvotes'
-              )} &#9650; Upvote`;
-              displayNotification(error, 'error');
-            }
-          })()
+        const $element = D.createElement('span');
+        ReactDOM.render(
+          <Upvote commentId={commentId} upvotes={upvotes} />,
+          $element
         );
         return $element;
       })()
@@ -215,4 +190,4 @@ const getViewBuilderByStateType = (stateType) => (action) => {
   }
 };
 
-export { getViewBuilderByStateType };
+export { getViewBuilderByStateType, displayNotification };
