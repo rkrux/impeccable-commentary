@@ -1,14 +1,22 @@
 // TODO: Try Again button for API failures?
 
-import { getUsersFromAPI, addCommentToAPI } from './apis';
+import { getUsersFromAPI } from './apis';
 import { $commentSubmit, $commentInput, $userDisplayPic } from './domSelectors';
 import {
   ASYNC_STATES,
   globalState,
   getStateUpdaterByStateType,
 } from './states';
-import { getViewBuilderByStateType, loadCommentList } from './views';
-import { selectNewUser, handleCommentInputValidity } from './utils';
+import {
+  getViewBuilderByStateType,
+  loadCommentList,
+  submitComment,
+} from './views';
+import {
+  selectNewUser,
+  handleCommentInputValidity,
+  handleCommentInputError,
+} from './utils';
 import './styles/style.css';
 
 // TODO: Make this reusable with comment replies too
@@ -18,7 +26,7 @@ const handleCommentSubmit = async ($commentInput) => {
     return;
   }
 
-  await submitComment(commentText);
+  await submitComment(null, $commentInput, $commentSubmit);
   if (globalState.commentSubmit.error === null) {
     $commentInput.value = '';
     // Select a new user randomly after every successful comment submission
@@ -38,24 +46,6 @@ const loadUsers = async () => {
   try {
     const result = await getUsersFromAPI();
     update({ type: ASYNC_STATES.DATA, payload: result.users });
-  } catch (error) {
-    update({ type: ASYNC_STATES.ERROR, payload: error });
-  }
-};
-const submitComment = async (commentText) => {
-  const update = (action) => {
-    getStateUpdaterByStateType('commentSubmit')(action);
-    getViewBuilderByStateType('commentSubmit')(action);
-  };
-
-  update({ type: ASYNC_STATES.LOADING });
-  try {
-    await addCommentToAPI({
-      userId: globalState.selectedUser.userId,
-      commentText,
-    });
-    update({ type: ASYNC_STATES.DATA, payload: 'Submitted comment!' });
-    loadCommentList();
   } catch (error) {
     update({ type: ASYNC_STATES.ERROR, payload: error });
   }

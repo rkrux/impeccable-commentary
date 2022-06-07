@@ -11,17 +11,12 @@ const globalState = {
     data: null,
     error: null,
   },
-  selectedUser: null,
   commentList: {
     loading: false,
     data: null,
     error: null,
   },
-  commentSubmit: {
-    loading: false,
-    data: null,
-    error: null,
-  },
+  selectedUser: null,
 };
 const getStateUpdaterByStateType = (stateType) => (action) => {
   const { type, payload } = action;

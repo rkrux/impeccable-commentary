@@ -122,7 +122,11 @@ const buildCommentReplyContainer = (commentId, userName) => {
     if (isErroneous) {
       return;
     }
-    await submitCommentReply(commentId, $commentInput);
+    await submitComment(
+      commentId,
+      $commentInput,
+      D.querySelector(`#comment-${commentId}-reply-submit`)
+    );
   });
 
   const $commentInputActionContainer = D.createElement('div');
@@ -299,23 +303,26 @@ const loadCommentList = async () => {
   }
 };
 
-const submitCommentReply = async (commentId, $commentInput) => {
-  const $commentReplyButton = D.querySelector(
-    `#comment-${commentId}-reply-submit`
-  );
-  $commentReplyButton.textContent = 'Submitting...';
+const submitComment = async (commentId, $commentInput, $commentSubmit) => {
+  $commentSubmit.textContent = 'Submitting...';
   try {
     await addCommentToAPI({
       userId: globalState.selectedUser.userId,
       commentText: $commentInput.value.trim(),
       parentCommentId: commentId,
     });
+    $commentSubmit.textContent = 'Comment';
     displayNotification('Submitted comment!', 'success');
     loadCommentList();
   } catch (error) {
-    $commentReplyButton.textContent = 'Comment';
+    $commentSubmit.textContent = 'Comment';
     displayNotification(error, 'error');
   }
 };
 
-export { getViewBuilderByStateType, displayNotification, loadCommentList };
+export {
+  getViewBuilderByStateType,
+  displayNotification,
+  loadCommentList,
+  submitComment,
+};
