@@ -1,11 +1,13 @@
 export const D = document;
-export const $appInitialization = D.querySelector("#appInitialization");
-export const $commentary = D.querySelector("#commentary");
-export const $userDisplayPic = D.querySelector("#displayPic");
-export const $commentInput = D.querySelector("#commentInput");
-export const $commentSubmit = D.querySelector("#commentSubmit");
-export const $commentList = D.querySelector("#commentList");
-export const $commentLoader = D.querySelector("#commentLoader");
-export const $commentListError = D.querySelector("#commentListError");
-export const $notification = D.querySelector("#notification");
-export const getCommentUpvoteElementById = (id) => D.querySelector(`#${id}`);
+export const $appInitialization = D.querySelector('#appInitialization');
+export const $commentary = D.querySelector('#commentary');
+export const $userDisplayPic = D.querySelector('#displayPic');
+export const $commentInput = D.querySelector('#commentInput');
+export const $commentSubmit = D.querySelector('#commentSubmit');
+export const $commentList = D.querySelector('#commentList');
+export const $commentLoader = D.querySelector('#commentLoader');
+export const $commentListError = D.querySelector('#commentListError');
+export const $notification = D.querySelector('#notification');
+export const getCommentUpvoteElementById = (id) => D.querySelector(`#${id}`); // TODO: Delete this
+export const getCommentReplyContainerByCommentId = (commentId) =>
+  D.querySelector(`#comment-${commentId}-reply-container`);

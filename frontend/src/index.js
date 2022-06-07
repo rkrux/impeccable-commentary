@@ -15,7 +15,7 @@ import { getViewBuilderByStateType } from './views';
 import './styles/style.css';
 
 const DEFAULT_USER = { userId: 101, userName: 'John Doe' };
-const selectNewUser = () => {
+export const selectNewUser = () => {
   if (globalState.userList.data !== null) {
     globalState.selectedUser =
       globalState.userList.data[
@@ -67,7 +67,7 @@ const loadUsers = async () => {
     update({ type: ASYNC_STATES.ERROR, payload: error });
   }
 };
-const loadCommentList = async () => {
+export const loadCommentList = async () => {
   const update = (action) => {
     getStateUpdaterByStateType('commentList')(action);
     getViewBuilderByStateType('commentList')(action);
