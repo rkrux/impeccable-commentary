@@ -19,20 +19,12 @@ import {
 } from './utils';
 import './styles/style.css';
 
-// TODO: Make this reusable with comment replies too
 const handleCommentSubmit = async ($commentInput) => {
   const isErroneous = handleCommentInputError($commentInput);
   if (isErroneous) {
     return;
   }
-
   await submitComment(null, $commentInput, $commentSubmit);
-  if (globalState.commentSubmit.error === null) {
-    $commentInput.value = '';
-    // Select a new user randomly after every successful comment submission
-    // to boost interactivity.
-    selectNewUser();
-  }
 };
 
 // Asynchronous Flow

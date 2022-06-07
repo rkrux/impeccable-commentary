@@ -3,7 +3,6 @@ import {
   D,
   $appInitialization,
   $commentary,
-  $commentSubmit,
   $commentList,
   $commentLoader,
   $commentListError,
@@ -242,20 +241,6 @@ const commentListErrorView = () => {
   $commentListError.classList.remove('hidden');
 };
 
-// Submit Comment Views
-const commentSubmitLoadingView = () => {
-  $commentSubmit.textContent = 'Submitting...';
-};
-const commentSubmitSuccessView = () => {
-  $commentSubmit.textContent = 'Comment';
-  // Consider removing this to reduce UX interactions
-  displayNotification(globalState.commentSubmit.data, 'success');
-};
-const commentSubmitErrorView = () => {
-  $commentSubmit.textContent = 'Comment';
-  displayNotification(globalState.commentSubmit.error, 'error');
-};
-
 const viewBuilders = {
   userList: {
     loading: userListLoadingView,
@@ -266,11 +251,6 @@ const viewBuilders = {
     loading: commentListLoadingView,
     data: commentListSuccessView,
     error: commentListErrorView,
-  },
-  commentSubmit: {
-    loading: commentSubmitLoadingView,
-    data: commentSubmitSuccessView,
-    error: commentSubmitErrorView,
   },
 };
 const getViewBuilderByStateType = (stateType) => (action) => {
@@ -312,8 +292,12 @@ const submitComment = async (commentId, $commentInput, $commentSubmit) => {
       parentCommentId: commentId,
     });
     $commentSubmit.textContent = 'Comment';
+    $commentInput.value = '';
     displayNotification('Submitted comment!', 'success');
     loadCommentList();
+    // Select a new user randomly after every successful comment submission
+    // to boost interactivity.
+    selectNewUser();
   } catch (error) {
     $commentSubmit.textContent = 'Comment';
     displayNotification(error, 'error');
