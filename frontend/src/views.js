@@ -10,13 +10,12 @@ import {
   $notification,
   getCommentReplyContainerByCommentId,
 } from './domSelectors';
-import { globalState } from './states';
+import { globalState, getStateUpdaterByStateType } from './states';
 import { getFormattedDuration } from './utils';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import Upvote from './components/Upvote.jsx';
-import { loadCommentList, selectNewUser } from './index.js';
-import { addCommentToAPI } from './apis';
+import { addCommentToAPI, getCommentsFromAPI } from './apis';
 
 const MESSAGE_TIMEOUT_MS = 4000;
 
@@ -44,8 +43,111 @@ const buildDisplayPicElement = (userName) => {
   return $element;
 };
 
-// TODO: Break the function down to readable components
-const buildComment = (comment) => {
+const buildDisplayPicContainer = (userName, children = []) => {
+  const $element = D.createElement('div');
+  $element.className = 'displayPicContainer';
+
+  $element.appendChild(buildDisplayPicElement(userName));
+
+  if (children.length > 0) {
+    $element.appendChild(
+      (function () {
+        const $element = D.createElement('div');
+        $element.className = 'commentChildrenIndicator';
+        $element.appendChild(D.createElement('div'));
+        return $element;
+      })()
+    );
+  }
+
+  return $element;
+};
+
+const buildCommentHeading = (userName, createdAt) => {
+  const $element = D.createElement('div');
+  $element.className = 'commentHeading';
+  $element.innerHTML = `<span class="commentUser">${userName}</span><span>&nbsp;&#183;&nbsp;</span><span class="commentCreatedAt">${getFormattedDuration(
+    new Date(createdAt).getTime()
+  )}</span>`;
+  return $element;
+};
+
+const buildCommentText = (commentText) => {
+  const $element = D.createElement('p');
+  $element.className = 'commentText';
+  $element.textContent = commentText;
+  return $element;
+};
+
+const buildUpvoteButton = (commentId, upvotes) => {
+  const $element = D.createElement('span');
+  const reactElement = ReactDOM.createRoot($element);
+  reactElement.render(<Upvote commentId={commentId} upvotes={upvotes} />);
+  return $element;
+};
+
+const buildReplyButton = (commentId, children) => {
+  const $element = D.createElement('button');
+  $element.id = `comment-${commentId}-reply`;
+  $element.className = 'commentAction';
+  $element.textContent = `${children.length} Reply`;
+  $element.addEventListener('click', () => {
+    const $commentReplyContainer =
+      getCommentReplyContainerByCommentId(commentId);
+    $commentReplyContainer.classList.remove('hidden');
+  });
+  return $element;
+};
+
+// TODO: Fix padding issue with DP container
+// TODO: Add handleCommentInput listener
+const buildCommentReplyContainer = (commentId) => {
+  const $replyInput = D.createElement('input');
+  $replyInput.id = `comment-${commentId}-reply-input`;
+  $replyInput.classList.add('emptyOrValidInput', 'commentInput');
+
+  const $replySubmit = D.createElement('button');
+  $replySubmit.id = `comment-${commentId}-reply-submit`;
+  $replySubmit.className = 'commentSubmit';
+  $replySubmit.textContent = 'Comment';
+  // TODO: Can we use common listener here?
+  $replySubmit.addEventListener('click', async () => {
+    const $commentReplyButton = D.querySelector(
+      `#comment-${commentId}-reply-submit`
+    );
+    $commentReplyButton.textContent = 'Submitting...';
+    try {
+      await addCommentToAPI({
+        userId: globalState.selectedUser.userId,
+        commentText: D.querySelector(`#comment-${commentId}-reply-input`).value, // TODO: Add sanitization
+        parentCommentId: commentId,
+      });
+      displayNotification('Submitted comment!', 'success');
+      loadCommentList();
+    } catch (error) {
+      $commentReplyButton.textContent = 'Comment';
+      displayNotification(error, 'error');
+    }
+  });
+
+  const $commentReplyInputContainer = D.createElement('div');
+  $commentReplyInputContainer.id = `comment-${commentId}-reply-input-container`;
+  $commentReplyInputContainer.className = 'commentInputContainer';
+  $commentReplyInputContainer.appendChild(
+    buildDisplayPicElement(globalState.selectedUser.userName)
+  );
+  $commentReplyInputContainer.appendChild($replyInput);
+  $commentReplyInputContainer.appendChild($replySubmit);
+
+  const $commentReplyContainer = D.createElement('div');
+  $commentReplyContainer.id = `comment-${commentId}-reply-container`;
+  $commentReplyContainer.className = 'hidden';
+  $commentReplyContainer.appendChild($commentReplyInputContainer);
+
+  return $commentReplyContainer;
+};
+
+const buildCommentDetails = (comment) => {
   const {
     commentId,
     commentText,
@@ -55,154 +157,44 @@ const buildComment = (comment) => {
     children = [],
     parentCommentId = null,
   } = comment;
+  const $element = D.createElement('div');
+  $element.className = 'commentDetails';
 
-  const $displayPicContainer = (function () {
-    const $element = D.createElement('div');
-    $element.className = 'displayPicContainer';
+  $element.appendChild(buildCommentHeading(userName, createdAt));
+  $element.appendChild(buildCommentText(commentText));
+  $element.appendChild(buildUpvoteButton(commentId, upvotes));
+  if (parentCommentId === null) {
+    $element.appendChild(buildReplyButton(commentId, children));
+  }
+  $element.appendChild(buildCommentReplyContainer(commentId));
 
-    $element.appendChild(buildDisplayPicElement(userName));
-
-    if (children.length > 0) {
-      $element.appendChild(
-        (function () {
-          const $element = D.createElement('div');
-          $element.className = 'commentChildrenIndicator';
-          $element.appendChild(D.createElement('div'));
-          return $element;
-        })()
-      );
-    }
-
-    return $element;
-  })();
-
-  const $commentDetails = (function () {
-    const $element = D.createElement('div');
-    $element.className = 'commentDetails';
-
+  // Nested Comments
+  if (children.length > 0) {
     $element.appendChild(
       (function () {
-        const $element = D.createElement('div');
-        $element.className = 'commentHeading';
-        $element.innerHTML = `<span class="commentUser">${userName}</span><span>&nbsp;&#183;&nbsp;</span><span class="commentCreatedAt">${getFormattedDuration(
-          new Date(createdAt).getTime()
-        )}</span>`;
-        return $element;
-      })()
-    );
-    $element.appendChild(
-      (function () {
-        const $element = D.createElement('p');
-        $element.className = 'commentText';
-        $element.textContent = commentText;
-        return $element;
-      })()
-    );
-    // Upvote Button
-    $element.appendChild(
-      (function () {
-        const $element = D.createElement('span');
-        const reactElement = ReactDOM.createRoot($element);
-        reactElement.render(<Upvote commentId={commentId} upvotes={upvotes} />);
-        return $element;
-      })()
-    );
-
-    // Reply Button
-    if (parentCommentId === null) {
-      $element.appendChild(
-        (function () {
-          const $element = D.createElement('button');
-          $element.id = `comment-${commentId}-reply`;
-          $element.className = 'commentAction';
-          $element.textContent = `${children.length} Reply`;
-          $element.addEventListener('click', () => {
-            const $commentReplyContainer =
-              getCommentReplyContainerByCommentId(commentId);
-            $commentReplyContainer.classList.remove('hidden');
-          });
-          return $element;
-        })()
-      );
-    }
-
-    // Reply Input Container
-    $element.appendChild(
-      // TODO: Reuse for Comment Input HTML too
-      (function () {
-        // TODO: Fix padding issue with DP container
-        // TODO: Add handleCommentInput listener
-        const $replyInput = D.createElement('input');
-        $replyInput.id = `comment-${commentId}-reply-input`;
-        $replyInput.classList.add('emptyOrValidInput', 'commentInput');
-
-        const $replySubmit = D.createElement('button');
-        $replySubmit.id = `comment-${commentId}-reply-submit`;
-        $replySubmit.className = 'commentSubmit';
-        $replySubmit.textContent = 'Comment';
-        // TODO: Can we use common listener here?
-        $replySubmit.addEventListener('click', async () => {
-          const $rb = D.querySelector(`#comment-${commentId}-reply-submit`);
-          $rb.textContent = 'Submitting...';
-          try {
-            await addCommentToAPI({
-              userId: globalState.selectedUser.userId,
-              commentText: D.querySelector(`#comment-${commentId}-reply-input`)
-                .value, // TODO: Add sanitization
-              parentCommentId: commentId,
-            });
-            displayNotification('Submitted comment!', 'success');
-            selectNewUser();
-            loadCommentList();
-          } catch (error) {
-            $rb.textContent = 'Comment';
-            displayNotification(error, 'error');
-          }
+        const $nestedCommentList = D.createElement('div');
+        children.forEach((childComment) => {
+          $nestedCommentList.appendChild(buildComment(childComment));
         });
-
-        const $commentReplyInputContainer = D.createElement('div');
-        $commentReplyInputContainer.id = `comment-${commentId}-reply-input-container`;
-        $commentReplyInputContainer.className = 'commentInputContainer';
-        $commentReplyInputContainer.appendChild(
-          buildDisplayPicElement(globalState.selectedUser.userName)
-        );
-        $commentReplyInputContainer.appendChild($replyInput);
-        $commentReplyInputContainer.appendChild($replySubmit);
-
-        const $commentReplyContainer = D.createElement('div');
-        $commentReplyContainer.id = `comment-${commentId}-reply-container`;
-        $commentReplyContainer.className = 'hidden';
-        $commentReplyContainer.appendChild($commentReplyInputContainer);
-
-        return $commentReplyContainer;
+        return $nestedCommentList;
       })()
     );
+  }
 
-    // Nested Comments
-    if (children.length > 0) {
-      $element.appendChild(
-        (function () {
-          const $nestedCommentList = D.createElement('div');
-          children.forEach((childComment) => {
-            $nestedCommentList.appendChild(buildComment(childComment));
-          });
-          return $nestedCommentList;
-        })()
-      );
-    }
+  return $element;
+};
 
-    return $element;
-  })();
+const buildComment = (comment) => {
+  const $element = D.createElement('div');
+  $element.id = `comment-${comment.commentId}`;
+  $element.className = 'commentContainer';
 
-  return (function () {
-    const $element = D.createElement('div');
-    $element.setAttribute('id', `comment-${commentId}`); // TODO: Use id directly
-    $element.className = 'commentContainer';
-    $element.appendChild($displayPicContainer);
-    $element.appendChild($commentDetails);
+  $element.appendChild(
+    buildDisplayPicContainer(comment.userName, comment.children)
+  );
+  $element.appendChild(buildCommentDetails(comment));
 
-    return $element;
-  })();
+  return $element;
 };
 
 // List User Views
@@ -293,4 +285,19 @@ const getViewBuilderByStateType = (stateType) => (action) => {
   }
 };
 
-export { getViewBuilderByStateType, displayNotification };
+const loadCommentList = async () => {
+  const update = (action) => {
+    getStateUpdaterByStateType('commentList')(action);
+    getViewBuilderByStateType('commentList')(action);
+  };
+
+  update({ type: ASYNC_STATES.LOADING });
+  try {
+    const result = await getCommentsFromAPI();
+    update({ type: ASYNC_STATES.DATA, payload: result.comments });
+  } catch (error) {
+    update({ type: ASYNC_STATES.ERROR, payload: error });
+  }
+};
+
+export { getViewBuilderByStateType, displayNotification, loadCommentList };

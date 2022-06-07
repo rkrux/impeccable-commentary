@@ -1,34 +1,15 @@
-/*
-  TODOs:
-    Try Again button for API failures?
-*/
+// TODO: Try Again button for API failures?
 
-import { getUsersFromAPI, getCommentsFromAPI, addCommentToAPI } from './apis';
+import { getUsersFromAPI, addCommentToAPI } from './apis';
 import { $commentSubmit, $commentInput, $userDisplayPic } from './domSelectors';
-import { getRandomNumber } from './utils';
 import {
   ASYNC_STATES,
   globalState,
   getStateUpdaterByStateType,
 } from './states';
-import { getViewBuilderByStateType } from './views';
+import { getViewBuilderByStateType, loadCommentList } from './views';
+import { selectNewUser } from './utils';
 import './styles/style.css';
-
-// TODO: Remove exports from this file
-const DEFAULT_USER = { userId: 101, userName: 'John Doe' };
-export const selectNewUser = () => {
-  if (globalState.userList.data !== null) {
-    globalState.selectedUser =
-      globalState.userList.data[
-        getRandomNumber(globalState.userList.data.length - 1)
-      ];
-  } else {
-    // Not stopping the app in case loading users fails,
-    // continuing with default user instead
-    globalState.selectedUser = DEFAULT_USER;
-  }
-  $userDisplayPic.textContent = globalState.selectedUser.userName.charAt(0);
-};
 
 // Event Handlers
 const handleCommentInput = () => {
@@ -70,20 +51,6 @@ const loadUsers = async () => {
     update({ type: ASYNC_STATES.ERROR, payload: error });
   }
 };
-export const loadCommentList = async () => {
-  const update = (action) => {
-    getStateUpdaterByStateType('commentList')(action);
-    getViewBuilderByStateType('commentList')(action);
-  };
-
-  update({ type: ASYNC_STATES.LOADING });
-  try {
-    const result = await getCommentsFromAPI();
-    update({ type: ASYNC_STATES.DATA, payload: result.comments });
-  } catch (error) {
-    update({ type: ASYNC_STATES.ERROR, payload: error });
-  }
-};
 const submitComment = async (commentText) => {
   const update = (action) => {
     getStateUpdaterByStateType('commentSubmit')(action);
@@ -110,5 +77,6 @@ const submitComment = async (commentText) => {
 
   await loadUsers();
   selectNewUser();
+  $userDisplayPic.textContent = globalState.selectedUser.userName.charAt(0);
   loadCommentList();
 })();

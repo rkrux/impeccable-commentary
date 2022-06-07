@@ -1,3 +1,5 @@
+import { globalState } from './states';
+
 const getRandomNumber = (maxValue) => {
   return Math.floor(Math.random() * maxValue);
 };
@@ -31,4 +33,18 @@ const getFormattedDuration = (dateTimeInMs) => {
   return `${pluralize(Math.floor(durationInSec / 31540000), 'year')} ago`;
 };
 
-export { getRandomNumber, getFormattedDuration };
+const DEFAULT_USER = { userId: 101, userName: 'John Doe' };
+const selectNewUser = () => {
+  if (globalState.userList.data !== null) {
+    globalState.selectedUser =
+      globalState.userList.data[
+        getRandomNumber(globalState.userList.data.length - 1)
+      ];
+  } else {
+    // Not stopping the app in case loading users fails,
+    // continuing with default user instead
+    globalState.selectedUser = DEFAULT_USER;
+  }
+};
+
+export { getRandomNumber, getFormattedDuration, selectNewUser };
