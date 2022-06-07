@@ -55,6 +55,18 @@ const buildComment = (comment) => {
         return $element;
       })()
     );
+
+    if (children.length > 0) {
+      $element.appendChild(
+        (function () {
+          const $element = D.createElement('div');
+          $element.className = 'commentChildrenIndicator';
+          $element.appendChild(D.createElement('div'));
+          return $element;
+        })()
+      );
+    }
+
     return $element;
   })();
 

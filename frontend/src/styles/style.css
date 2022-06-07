@@ -48,6 +48,18 @@ body {
   justify-content: center;
 }
 
+.commentChildrenIndicator {
+  display: flex;
+  justify-content: center;
+  height: calc(100% - 48px); /* TODO: Revisit this */
+}
+
+.commentChildrenIndicator > div {
+  border: 1px solid lightgray;
+  background-color: lightgray;
+  width: 1%;
+}
+
 #commentInputContainer {
   display: flex;
 }
