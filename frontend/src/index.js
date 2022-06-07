@@ -14,6 +14,7 @@ import {
 import { getViewBuilderByStateType } from './views';
 import './styles/style.css';
 
+// TODO: Remove exports from this file
 const DEFAULT_USER = { userId: 101, userName: 'John Doe' };
 export const selectNewUser = () => {
   if (globalState.userList.data !== null) {
@@ -36,6 +37,8 @@ const handleCommentInput = () => {
     $commentInput.className = 'emptyOrValidInput';
   }
 };
+
+// TODO: Make this reusable with comment replies too
 const handleCommentSubmit = async () => {
   const commentText = $commentInput.value.trim(); // TODO: Santize input
   if (commentText.length === 0) {

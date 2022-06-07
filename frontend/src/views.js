@@ -40,9 +40,11 @@ const buildDisplayPicElement = (userName) => {
   const $element = D.createElement('div');
   $element.className = 'displayPic';
   $element.textContent = userName.charAt(0);
+  $element.title = userName;
   return $element;
 };
 
+// TODO: Break the function down to readable components
 const buildComment = (comment) => {
   const {
     commentId,
@@ -126,7 +128,10 @@ const buildComment = (comment) => {
 
     // Reply Input Container
     $element.appendChild(
+      // TODO: Reuse for Comment Input HTML too
       (function () {
+        // TODO: Fix padding issue with DP container
+        // TODO: Add handleCommentInput listener
         const $replyInput = D.createElement('input');
         $replyInput.id = `comment-${commentId}-reply-input`;
         $replyInput.classList.add('emptyOrValidInput', 'commentInput');
@@ -135,6 +140,7 @@ const buildComment = (comment) => {
         $replySubmit.id = `comment-${commentId}-reply-submit`;
         $replySubmit.className = 'commentSubmit';
         $replySubmit.textContent = 'Comment';
+        // TODO: Can we use common listener here?
         $replySubmit.addEventListener('click', async () => {
           const $rb = D.querySelector(`#comment-${commentId}-reply-submit`);
           $rb.textContent = 'Submitting...';
