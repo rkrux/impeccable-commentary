@@ -20,15 +20,8 @@ import {
 } from './utils';
 import './styles/style.css';
 
-const handleCommentSubmit = async ($commentInput) => {
-  const isErroneous = handleCommentInputError($commentInput);
-  if (isErroneous) {
-    return;
-  }
-  await submitComment(null, $commentInput, $commentSubmit);
-};
-
-// Asynchronous Flow
+// Fetching few users from BE so as to randomize later after each
+// comment and/or reply submission
 const loadUsers = async () => {
   const update = (action) => {
     getStateUpdaterByStateType('userList')(action);
@@ -53,9 +46,13 @@ const loadUsers = async () => {
   $commentInput.addEventListener('change', () =>
     handleCommentInputValidity($commentInput)
   );
-  $commentSubmit.addEventListener('click', () =>
-    handleCommentSubmit($commentInput)
-  );
+  $commentSubmit.addEventListener('click', async () => {
+    const isErroneous = handleCommentInputError($commentInput);
+    if (isErroneous) {
+      return;
+    }
+    await submitComment(null, $commentInput, $commentSubmit);
+  });
 
   loadCommentList();
 })();

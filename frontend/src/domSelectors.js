@@ -10,3 +10,7 @@ export const $commentListError = D.querySelector('#commentListError');
 export const $notification = D.querySelector('#notification');
 export const getCommentReplyContainerByCommentId = (commentId) =>
   D.querySelector(`#comment-${commentId}-reply-container`);
+export const getCommentReplyInputByCommentId = (commentId) =>
+  D.querySelector(`#comment-${commentId}-reply-input`);
+export const getCommentReplySubmitByCommentId = (commentId) =>
+  D.querySelector(`#comment-${commentId}-reply-submit`);

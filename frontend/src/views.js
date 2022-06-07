@@ -9,6 +9,8 @@ import {
   $commentListError,
   $notification,
   getCommentReplyContainerByCommentId,
+  getCommentReplyInputByCommentId,
+  getCommentReplySubmitByCommentId,
 } from './domSelectors';
 import { globalState, getStateUpdaterByStateType } from './states';
 import {
@@ -45,7 +47,7 @@ const enrichUserDisplayPic = ($userDisplayPic, userName) => {
   $userDisplayPic.title = userName;
 };
 
-const buildDisplayPicElement = (userName) => {
+const buildUserDisplayPicElement = (userName) => {
   const $element = D.createElement('div');
   $element.className = 'displayPic';
   enrichUserDisplayPic($element, userName);
@@ -56,7 +58,7 @@ const buildDisplayPicContainer = (userName, children = []) => {
   const $element = D.createElement('div');
   $element.className = 'displayPicContainer';
 
-  $element.appendChild(buildDisplayPicElement(userName));
+  $element.appendChild(buildUserDisplayPicElement(userName));
 
   if (children.length > 0) {
     $element.appendChild(
@@ -108,6 +110,7 @@ const buildReplyButton = (commentId, children) => {
   return $element;
 };
 
+// TODO: Generalise this function enough to support both comment & reply submission
 const buildCommentReplyContainer = (commentId, userName) => {
   const $replyInput = D.createElement('input');
   $replyInput.id = `comment-${commentId}-reply-input`;
@@ -122,7 +125,7 @@ const buildCommentReplyContainer = (commentId, userName) => {
   $replySubmit.className = 'commentSubmit';
   $replySubmit.textContent = 'Comment';
   $replySubmit.addEventListener('click', async () => {
-    const $commentInput = D.querySelector(`#comment-${commentId}-reply-input`);
+    const $commentInput = getCommentReplyInputByCommentId(commentId);
     const isErroneous = handleCommentInputError($commentInput);
     if (isErroneous) {
       return;
@@ -130,7 +133,7 @@ const buildCommentReplyContainer = (commentId, userName) => {
     await submitComment(
       commentId,
       $commentInput,
-      D.querySelector(`#comment-${commentId}-reply-submit`)
+      getCommentReplySubmitByCommentId(commentId)
     );
   });
 
@@ -143,7 +146,7 @@ const buildCommentReplyContainer = (commentId, userName) => {
   $commentReplyInputContainer.id = `comment-${commentId}-reply-input-container`;
   $commentReplyInputContainer.className = 'commentInputContainer';
   $commentReplyInputContainer.appendChild(
-    buildDisplayPicElement(globalState.selectedUser.userName)
+    buildUserDisplayPicElement(globalState.selectedUser.userName)
   );
   $commentReplyInputContainer.appendChild($commentInputActionContainer);
 
@@ -301,8 +304,8 @@ const submitComment = async (commentId, $commentInput, $commentSubmit) => {
     $commentInput.value = '';
     displayNotification('Submitted comment!', 'success');
     loadCommentList();
-    // Select a new user randomly after every successful comment submission
-    // to boost interactivity.
+    // Select a new user randomly after every successful comment and/or reply
+    // submission to boost interactivity.
     selectNewUser();
     enrichUserDisplayPic($userDisplayPic, globalState.selectedUser.userName);
   } catch (error) {
