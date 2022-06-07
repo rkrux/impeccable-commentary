@@ -1,48 +1,37 @@
 const knexConfig = {
   development: {
-    client: "pg",
+    client: 'pg',
     connection: {
-      host: "127.0.0.1",
-      user: "postgres",
-      password: "postgres",
-      database: "impeccableCommentary",
-      charset: "utf8",
+      host: process.env.DB_URL,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      charset: 'utf8',
     },
     migrations: {
-      directory: "./knex/migrations",
+      directory: './knex/migrations',
     },
     seeds: {
-      directory: "./knex/seeds",
-    },
-  },
-  staging: {
-    client: "postgresql",
-    connection: {
-      database: "my_db",
-      user: "username",
-      password: "password",
-    },
-    pool: {
-      min: 2,
-      max: 10,
-    },
-    migrations: {
-      tableName: "knex_migrations",
+      directory: './knex/seeds',
     },
   },
   production: {
-    client: "postgresql",
+    client: 'postgresql',
     connection: {
-      database: "my_db",
-      user: "username",
-      password: "password",
+      host: process.env.DB_URL,
+      database: process.env.DB_NAME,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
     },
     pool: {
       min: 2,
       max: 10,
     },
     migrations: {
-      tableName: "knex_migrations",
+      tableName: 'knex_migrations',
+    },
+    seeds: {
+      directory: './knex/seeds',
     },
   },
 };
