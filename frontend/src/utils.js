@@ -47,17 +47,28 @@ const selectNewUser = () => {
   }
 };
 
-const handleCommentInput = ($commentInput) => {
-  const commentText = $commentInput.value;
-  if (commentText.trim().length > 0) {
+const handleCommentInputValidity = ($commentInput) => {
+  const commentText = $commentInput.value.trim();
+  if (commentText.length > 0) {
     $commentInput.classList.remove('erroneousInput');
     $commentInput.classList.add('emptyOrValidInput');
   }
+};
+
+const handleCommentInputError = ($commentInput) => {
+  const commentText = $commentInput.value.trim();
+  if (commentText.length === 0) {
+    $commentInput.classList.add('erroneousInput');
+    $commentInput.classList.remove('emptyOrValidInput');
+    return true;
+  }
+  return false;
 };
 
 export {
   getRandomNumber,
   getFormattedDuration,
   selectNewUser,
-  handleCommentInput,
+  handleCommentInputValidity,
+  handleCommentInputError,
 };

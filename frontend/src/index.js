@@ -8,15 +8,13 @@ import {
   getStateUpdaterByStateType,
 } from './states';
 import { getViewBuilderByStateType, loadCommentList } from './views';
-import { selectNewUser, handleCommentInput } from './utils';
+import { selectNewUser, handleCommentInputValidity } from './utils';
 import './styles/style.css';
 
 // TODO: Make this reusable with comment replies too
 const handleCommentSubmit = async ($commentInput) => {
-  const commentText = $commentInput.value.trim();
-  if (commentText.length === 0) {
-    $commentInput.classList.remove('emptyOrValidInput');
-    $commentInput.classList.add('erroneousInput');
+  const isErroneous = handleCommentInputError($commentInput);
+  if (isErroneous) {
     return;
   }
 
@@ -70,7 +68,7 @@ const submitComment = async (commentText) => {
   $userDisplayPic.textContent = globalState.selectedUser.userName.charAt(0);
 
   $commentInput.addEventListener('change', () =>
-    handleCommentInput($commentInput)
+    handleCommentInputValidity($commentInput)
   );
   $commentSubmit.addEventListener('click', () =>
     handleCommentSubmit($commentInput)

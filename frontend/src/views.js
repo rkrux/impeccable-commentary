@@ -11,7 +11,11 @@ import {
   getCommentReplyContainerByCommentId,
 } from './domSelectors';
 import { globalState, getStateUpdaterByStateType } from './states';
-import { getFormattedDuration, handleCommentInput } from './utils';
+import {
+  getFormattedDuration,
+  handleCommentInputValidity,
+  handleCommentInputError,
+} from './utils';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import Upvote from './components/Upvote.jsx';
@@ -104,38 +108,21 @@ const buildCommentReplyContainer = (commentId, userName) => {
   $replyInput.id = `comment-${commentId}-reply-input`;
   $replyInput.classList.add('emptyOrValidInput', 'commentInput');
   $replyInput.placeholder = `Reply to ${userName}`;
-  $replyInput.addEventListener('change', () => handleCommentInput($replyInput));
+  $replyInput.addEventListener('change', () =>
+    handleCommentInputValidity($replyInput)
+  );
 
   const $replySubmit = D.createElement('button');
   $replySubmit.id = `comment-${commentId}-reply-submit`;
   $replySubmit.className = 'commentSubmit';
   $replySubmit.textContent = 'Comment';
   $replySubmit.addEventListener('click', async () => {
-    const $commentReplyButton = D.querySelector(
-      `#comment-${commentId}-reply-submit`
-    );
     const $commentInput = D.querySelector(`#comment-${commentId}-reply-input`);
-
-    const commentText = $commentInput.value.trim();
-    if (commentText.length === 0) {
-      $commentInput.classList.add('erroneousInput');
-      $commentInput.classList.remove('emptyOrValidInput');
+    const isErroneous = handleCommentInputError($commentInput);
+    if (isErroneous) {
       return;
     }
-
-    $commentReplyButton.textContent = 'Submitting...';
-    try {
-      await addCommentToAPI({
-        userId: globalState.selectedUser.userId,
-        commentText,
-        parentCommentId: commentId,
-      });
-      displayNotification('Submitted comment!', 'success');
-      loadCommentList();
-    } catch (error) {
-      $commentReplyButton.textContent = 'Comment';
-      displayNotification(error, 'error');
-    }
+    await submitCommentReply(commentId, $commentInput);
   });
 
   const $commentInputActionContainer = D.createElement('div');
@@ -309,6 +296,25 @@ const loadCommentList = async () => {
     update({ type: ASYNC_STATES.DATA, payload: result.comments });
   } catch (error) {
     update({ type: ASYNC_STATES.ERROR, payload: error });
+  }
+};
+
+const submitCommentReply = async (commentId, $commentInput) => {
+  const $commentReplyButton = D.querySelector(
+    `#comment-${commentId}-reply-submit`
+  );
+  $commentReplyButton.textContent = 'Submitting...';
+  try {
+    await addCommentToAPI({
+      userId: globalState.selectedUser.userId,
+      commentText: $commentInput.value.trim(),
+      parentCommentId: commentId,
+    });
+    displayNotification('Submitted comment!', 'success');
+    loadCommentList();
+  } catch (error) {
+    $commentReplyButton.textContent = 'Comment';
+    displayNotification(error, 'error');
   }
 };
 
