@@ -94,17 +94,17 @@ const buildReplyButton = (commentId, children) => {
   $element.addEventListener('click', () => {
     const $commentReplyContainer =
       getCommentReplyContainerByCommentId(commentId);
-    $commentReplyContainer.classList.remove('hidden');
+    $commentReplyContainer.classList.toggle('hidden');
   });
   return $element;
 };
 
-// TODO: Fix padding issue with DP container
 // TODO: Add handleCommentInput listener
-const buildCommentReplyContainer = (commentId) => {
+const buildCommentReplyContainer = (commentId, userName) => {
   const $replyInput = D.createElement('input');
   $replyInput.id = `comment-${commentId}-reply-input`;
   $replyInput.classList.add('emptyOrValidInput', 'commentInput');
+  $replyInput.placeholder = `Reply to ${userName}`;
 
   const $replySubmit = D.createElement('button');
   $replySubmit.id = `comment-${commentId}-reply-submit`;
@@ -130,14 +130,18 @@ const buildCommentReplyContainer = (commentId) => {
     }
   });
 
+  const $commentInputActionContainer = D.createElement('div');
+  $commentInputActionContainer.className = 'commentInputActionContainer';
+  $commentInputActionContainer.appendChild($replyInput);
+  $commentInputActionContainer.appendChild($replySubmit);
+
   const $commentReplyInputContainer = D.createElement('div');
   $commentReplyInputContainer.id = `comment-${commentId}-reply-input-container`;
   $commentReplyInputContainer.className = 'commentInputContainer';
   $commentReplyInputContainer.appendChild(
     buildDisplayPicElement(globalState.selectedUser.userName)
   );
-  $commentReplyInputContainer.appendChild($replyInput);
-  $commentReplyInputContainer.appendChild($replySubmit);
+  $commentReplyInputContainer.appendChild($commentInputActionContainer);
 
   const $commentReplyContainer = D.createElement('div');
   $commentReplyContainer.id = `comment-${commentId}-reply-container`;
@@ -166,7 +170,7 @@ const buildCommentDetails = (comment) => {
   if (parentCommentId === null) {
     $element.appendChild(buildReplyButton(commentId, children));
   }
-  $element.appendChild(buildCommentReplyContainer(commentId));
+  $element.appendChild(buildCommentReplyContainer(commentId, userName));
 
   // Nested Comments
   if (children.length > 0) {

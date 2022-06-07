@@ -71,13 +71,6 @@ body {
   padding-left: 10px;
 }
 
-#commentInput {
-  flex: auto;
-  margin-right: 10px;
-  border-style: solid;
-  border-radius: 4px;
-}
-
 .commentInput {
   flex: auto;
   margin-right: 10px;
@@ -108,6 +101,7 @@ body {
 
 .commentDetails {
   padding-left: 10px;
+  width: 100%;
 }
 
 .commentUser {
