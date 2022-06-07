@@ -6,7 +6,7 @@ import 'dotenv/config';
 import {
   testDBConnection,
   getUsers,
-  getComments,
+  getCommentsSortedByCreatedAt,
   getUpvotesGroupedByCommentId,
   getUpvotesByCommentId,
   addComment,
@@ -38,13 +38,44 @@ io.on('connection', (socket) => {
   });
 });
 
+// Helper Functions
 const buildErrorResponse = (api, res, error, errorCode = 500) => {
   console.log(`Error in ${api}: ${error}`);
   res.status(errorCode);
   res.json({ error });
 };
 
+async function getCommentsWithUpvotes() {
+  const comments = await getCommentsSortedByCreatedAt();
+  const upvotesByCommentArray = await getUpvotesGroupedByCommentId();
+  const upvotesByComment = upvotesByCommentArray.rows.reduce(
+    //BigInt type is returned as string in query results: https://github.com/knex/knex/issues/387
+    (acc, val) => ({ ...acc, [val.commentId]: Number(val.count) }),
+    {}
+  );
+  return comments.map((comment) => {
+    return {
+      ...comment,
+      upvotes: upvotesByComment[comment.commentId] ?? 0,
+    };
+  });
+}
+
+function buildParentCommentsWithChildren(commentsWithUpvotes) {
+  const parentComments = commentsWithUpvotes.filter(
+    (comment) => comment.parentCommentId === null
+  );
+  parentComments.forEach((pc) => {
+    const childComments = commentsWithUpvotes.filter(
+      (comment) => comment.parentCommentId === pc.commentId
+    );
+    pc.children = childComments;
+  });
+  return parentComments;
+}
+
 // Endpoints
+// TODO: Add json schema validator
 app.get('/getUsers', async (_, res) => {
   try {
     const users = await getUsers();
@@ -56,20 +87,9 @@ app.get('/getUsers', async (_, res) => {
 
 app.get('/getComments', async (_, res) => {
   try {
-    const comments = await getComments();
-    const upvotesByCommentArray = await getUpvotesGroupedByCommentId();
-    const upvotesByComment = upvotesByCommentArray.rows.reduce(
-      //BigInt type is returned as string in query results: https://github.com/knex/knex/issues/387
-      (acc, val) => ({ ...acc, [val.commentId]: Number(val.count) }),
-      {}
-    );
-    const commentsWithUpvotes = comments.map((comment) => {
-      return {
-        ...comment,
-        upvotes: upvotesByComment[comment.commentId] ?? 0,
-      };
-    });
-    res.json({ comments: commentsWithUpvotes });
+    const commentsWithUpvotes = await getCommentsWithUpvotes();
+    const parentComments = buildParentCommentsWithChildren(commentsWithUpvotes);
+    res.json({ comments: parentComments });
   } catch (error) {
     buildErrorResponse('get/comments', res, error);
   }
@@ -98,7 +118,7 @@ app.post('/addComment', async (req, res) => {
 });
 
 app.post('/upvoteComment', async (req, res) => {
-  const { commentId, userId } = req.body;
+  const { commentId, userId = null } = req.body;
 
   // Req Param Validation
   if (!commentId || !userId) {

@@ -17,13 +17,14 @@ async function getUsers() {
   return await knex('users').select('userId', 'userName');
 }
 
-async function getComments() {
+async function getCommentsSortedByCreatedAt() {
   return await knex('comments')
     .join('users', 'comments.userId', '=', 'users.userId')
     .select(
       'comments.commentId',
       'comments.commentText',
       'comments.userId',
+      'comments.parentCommentId',
       'comments.createdAt',
       'users.userName'
     )
@@ -43,10 +44,16 @@ async function getUpvotesByCommentId(commentId) {
   );
 }
 
-async function addComment({ commentText, userId, createdAt }) {
+async function addComment({
+  commentText,
+  userId,
+  parentCommentId = null,
+  createdAt,
+}) {
   await knex('comments').insert({
     commentText,
     userId,
+    parentCommentId,
     createdAt: createdAt ?? new Date(Date.now()).toISOString(),
   });
 }
@@ -62,7 +69,7 @@ async function addUpvote({ commentId, userId, createdAt }) {
 export {
   testDBConnection,
   getUsers,
-  getComments,
+  getCommentsSortedByCreatedAt,
   getUpvotesGroupedByCommentId,
   getUpvotesByCommentId,
   addComment,

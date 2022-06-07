@@ -3,11 +3,11 @@
  * @returns { Promise<void> }
  */
 export function up(knex) {
-  return knex.schema.createTable("comments", function (table) {
-    table.increments("commentId");
-    table.string("commentText", 1000).notNullable();
-    table.integer("userId").references("users.userId");
-    table.timestamp("createdAt").defaultTo(knex.fn.now());
+  return knex.schema.createTable('comments', function (table) {
+    table.increments('commentId');
+    table.string('commentText', 1000).notNullable();
+    table.integer('userId').references('users.userId');
+    table.timestamp('createdAt').defaultTo(knex.fn.now());
   });
 }
 
@@ -16,5 +16,5 @@ export function up(knex) {
  * @returns { Promise<void> }
  */
 export function down(knex) {
-  return knex.schema.dropTable("comments");
+  return knex.schema.dropTable('comments');
 }
