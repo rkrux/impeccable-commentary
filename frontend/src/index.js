@@ -11,6 +11,7 @@ import {
   getViewBuilderByStateType,
   loadCommentList,
   submitComment,
+  enrichUserDisplayPic,
 } from './views';
 import {
   selectNewUser,
@@ -47,7 +48,7 @@ const loadUsers = async () => {
 (async function initApp() {
   await loadUsers();
   selectNewUser();
-  $userDisplayPic.textContent = globalState.selectedUser.userName.charAt(0);
+  enrichUserDisplayPic($userDisplayPic, globalState.selectedUser.userName);
 
   $commentInput.addEventListener('change', () =>
     handleCommentInputValidity($commentInput)

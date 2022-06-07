@@ -2,6 +2,7 @@ import { ASYNC_STATES } from './states';
 import {
   D,
   $appInitialization,
+  $userDisplayPic,
   $commentary,
   $commentList,
   $commentLoader,
@@ -14,6 +15,7 @@ import {
   getFormattedDuration,
   handleCommentInputValidity,
   handleCommentInputError,
+  selectNewUser,
 } from './utils';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -38,11 +40,15 @@ const displayNotification = (message, className) => {
   }, MESSAGE_TIMEOUT_MS);
 };
 
+const enrichUserDisplayPic = ($userDisplayPic, userName) => {
+  $userDisplayPic.textContent = userName.charAt(0);
+  $userDisplayPic.title = userName;
+};
+
 const buildDisplayPicElement = (userName) => {
   const $element = D.createElement('div');
   $element.className = 'displayPic';
-  $element.textContent = userName.charAt(0);
-  $element.title = userName;
+  enrichUserDisplayPic($element, userName);
   return $element;
 };
 
@@ -298,6 +304,7 @@ const submitComment = async (commentId, $commentInput, $commentSubmit) => {
     // Select a new user randomly after every successful comment submission
     // to boost interactivity.
     selectNewUser();
+    enrichUserDisplayPic($userDisplayPic, globalState.selectedUser.userName);
   } catch (error) {
     $commentSubmit.textContent = 'Comment';
     displayNotification(error, 'error');
@@ -309,4 +316,5 @@ export {
   displayNotification,
   loadCommentList,
   submitComment,
+  enrichUserDisplayPic,
 };
