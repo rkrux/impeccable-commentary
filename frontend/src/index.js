@@ -12,7 +12,7 @@ import {
   getStateUpdaterByStateType,
 } from './states';
 import { getViewBuilderByStateType } from './views';
-import './style.css';
+import './styles/style.css';
 
 const DEFAULT_USER = { userId: 101, userName: 'John Doe' };
 const selectNewUser = () => {

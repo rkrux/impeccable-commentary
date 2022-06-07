@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import envConfig from '../env.config';
-import { upvoteCommentToAPI } from './apis';
-import { globalState } from './states';
-import { displayNotification } from './views';
+import envConfig from '../../env.config';
+import { upvoteCommentToAPI } from '../apis';
+import { globalState } from '../states';
+import { displayNotification } from '../views';
 
 const Upvote = ({ commentId, upvotes: originalUpvotes }) => {
   const [upvotes, setUpvotes] = useState(originalUpvotes);

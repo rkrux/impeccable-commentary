@@ -1,4 +1,4 @@
-import envConfig from '../env.config';
+import envConfig from '../../env.config';
 
 const requestHeaders = {
   Accept: 'application/json',

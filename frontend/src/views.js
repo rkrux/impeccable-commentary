@@ -13,7 +13,7 @@ import { globalState } from './states';
 import { getFormattedDuration } from './utils';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Upvote from './Upvote.jsx';
+import Upvote from './components/Upvote.jsx';
 
 const MESSAGE_TIMEOUT_MS = 4000;
 
