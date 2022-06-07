@@ -44,6 +44,7 @@ async function getUpvotesByCommentId(commentId) {
   );
 }
 
+// TODO: Restrict to one-level nesting in API too
 async function addComment({
   commentText,
   userId,
