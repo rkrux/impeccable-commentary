@@ -9,7 +9,7 @@ Before setting up the codebase, please ensure PostgreSQL is installed and setup 
 - npm install
 - npx knex migrate:latest
 - npx knex seed:run
-- npm start
+- npm run dev
 
 ## Frontend Setup
 
