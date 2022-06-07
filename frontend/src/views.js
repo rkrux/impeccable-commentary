@@ -41,6 +41,7 @@ const buildComment = (comment) => {
     createdAt,
     upvotes,
     children = [],
+    parentCommentId = null,
   } = comment;
 
   const $displayPicContainer = (function () {
@@ -100,15 +101,17 @@ const buildComment = (comment) => {
         return $element;
       })()
     );
-    $element.appendChild(
-      (function () {
-        const $element = D.createElement('button');
-        $element.id = `comment-${commentId}-reply`;
-        $element.className = 'commentAction';
-        $element.textContent = `${children.length} Reply`; // TODO: Add handling for Reply click
-        return $element;
-      })()
-    );
+    if (parentCommentId === null) {
+      $element.appendChild(
+        (function () {
+          const $element = D.createElement('button');
+          $element.id = `comment-${commentId}-reply`;
+          $element.className = 'commentAction';
+          $element.textContent = `${children.length} Reply`; // TODO: Add handling for Reply click
+          return $element;
+        })()
+      );
+    }
 
     if (children.length > 0) {
       $element.appendChild(
