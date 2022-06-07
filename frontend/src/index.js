@@ -8,22 +8,15 @@ import {
   getStateUpdaterByStateType,
 } from './states';
 import { getViewBuilderByStateType, loadCommentList } from './views';
-import { selectNewUser } from './utils';
+import { selectNewUser, handleCommentInput } from './utils';
 import './styles/style.css';
 
-// Event Handlers
-const handleCommentInput = () => {
-  const commentText = $commentInput.value;
-  if (commentText.trim().length > 0) {
-    $commentInput.className = 'emptyOrValidInput';
-  }
-};
-
 // TODO: Make this reusable with comment replies too
-const handleCommentSubmit = async () => {
-  const commentText = $commentInput.value.trim(); // TODO: Santize input
+const handleCommentSubmit = async ($commentInput) => {
+  const commentText = $commentInput.value.trim();
   if (commentText.length === 0) {
-    $commentInput.className = 'erroneousInput';
+    $commentInput.classList.remove('emptyOrValidInput');
+    $commentInput.classList.add('erroneousInput');
     return;
   }
 
@@ -72,11 +65,16 @@ const submitComment = async (commentText) => {
 
 // App initialization
 (async function initApp() {
-  $commentInput.addEventListener('change', handleCommentInput);
-  $commentSubmit.addEventListener('click', handleCommentSubmit);
-
   await loadUsers();
   selectNewUser();
   $userDisplayPic.textContent = globalState.selectedUser.userName.charAt(0);
+
+  $commentInput.addEventListener('change', () =>
+    handleCommentInput($commentInput)
+  );
+  $commentSubmit.addEventListener('click', () =>
+    handleCommentSubmit($commentInput)
+  );
+
   loadCommentList();
 })();

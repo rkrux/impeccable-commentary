@@ -47,4 +47,17 @@ const selectNewUser = () => {
   }
 };
 
-export { getRandomNumber, getFormattedDuration, selectNewUser };
+const handleCommentInput = ($commentInput) => {
+  const commentText = $commentInput.value;
+  if (commentText.trim().length > 0) {
+    $commentInput.classList.remove('erroneousInput');
+    $commentInput.classList.add('emptyOrValidInput');
+  }
+};
+
+export {
+  getRandomNumber,
+  getFormattedDuration,
+  selectNewUser,
+  handleCommentInput,
+};

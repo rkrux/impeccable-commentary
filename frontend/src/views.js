@@ -11,7 +11,7 @@ import {
   getCommentReplyContainerByCommentId,
 } from './domSelectors';
 import { globalState, getStateUpdaterByStateType } from './states';
-import { getFormattedDuration } from './utils';
+import { getFormattedDuration, handleCommentInput } from './utils';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import Upvote from './components/Upvote.jsx';
@@ -99,27 +99,35 @@ const buildReplyButton = (commentId, children) => {
   return $element;
 };
 
-// TODO: Add handleCommentInput listener
 const buildCommentReplyContainer = (commentId, userName) => {
   const $replyInput = D.createElement('input');
   $replyInput.id = `comment-${commentId}-reply-input`;
   $replyInput.classList.add('emptyOrValidInput', 'commentInput');
   $replyInput.placeholder = `Reply to ${userName}`;
+  $replyInput.addEventListener('change', () => handleCommentInput($replyInput));
 
   const $replySubmit = D.createElement('button');
   $replySubmit.id = `comment-${commentId}-reply-submit`;
   $replySubmit.className = 'commentSubmit';
   $replySubmit.textContent = 'Comment';
-  // TODO: Can we use common listener here?
   $replySubmit.addEventListener('click', async () => {
     const $commentReplyButton = D.querySelector(
       `#comment-${commentId}-reply-submit`
     );
+    const $commentInput = D.querySelector(`#comment-${commentId}-reply-input`);
+
+    const commentText = $commentInput.value.trim();
+    if (commentText.length === 0) {
+      $commentInput.classList.add('erroneousInput');
+      $commentInput.classList.remove('emptyOrValidInput');
+      return;
+    }
+
     $commentReplyButton.textContent = 'Submitting...';
     try {
       await addCommentToAPI({
         userId: globalState.selectedUser.userId,
-        commentText: D.querySelector(`#comment-${commentId}-reply-input`).value, // TODO: Add sanitization
+        commentText,
         parentCommentId: commentId,
       });
       displayNotification('Submitted comment!', 'success');
