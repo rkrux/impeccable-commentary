@@ -34,7 +34,14 @@ const displayNotification = (message, className) => {
 };
 
 const buildComment = (comment) => {
-  const { commentId, commentText, userName, createdAt, upvotes } = comment;
+  const {
+    commentId,
+    commentText,
+    userName,
+    createdAt,
+    upvotes,
+    children = [],
+  } = comment;
 
   const $displayPicContainer = (function () {
     const $element = D.createElement('div');
@@ -86,10 +93,23 @@ const buildComment = (comment) => {
         const $element = D.createElement('button');
         $element.id = `comment-${commentId}-reply`;
         $element.className = 'commentAction';
-        $element.textContent = `Reply`;
+        $element.textContent = `${children.length} Reply`; // TODO: Add handling for Reply click
         return $element;
       })()
     );
+
+    if (children.length > 0) {
+      $element.appendChild(
+        (function () {
+          const $nestedCommentList = D.createElement('div');
+          children.forEach((childComment) => {
+            $nestedCommentList.appendChild(buildComment(childComment));
+          });
+          return $nestedCommentList;
+        })()
+      );
+    }
+
     return $element;
   })();
 

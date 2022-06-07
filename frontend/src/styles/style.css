@@ -1,5 +1,5 @@
 body {
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   width: 50vw;
   padding-top: 10px;
   position: absolute;
@@ -82,7 +82,8 @@ body {
 
 .commentContainer {
   display: flex;
-  margin-bottom: 20px;
+  margin-top: 24px;
+  margin-bottom: 24px;
 }
 
 .commentDetails {
