@@ -77,7 +77,7 @@ const buildDisplayPicContainer = (userName, children = []) => {
 const buildCommentHeading = (userName, createdAt) => {
   const $element = D.createElement('div');
   $element.className = 'commentHeading';
-  $element.innerHTML = `<span class="commentUser">${userName}</span><span>&nbsp;&#183;&nbsp;</span><span class="commentCreatedAt">${getFormattedDuration(
+  $element.innerHTML = `<span class="commentUser">${userName}</span><span>&nbsp;&#183;&nbsp;</span><span class="commentCreatedAt" title=${createdAt}>${getFormattedDuration(
     new Date(createdAt).getTime()
   )}</span>`;
   return $element;
