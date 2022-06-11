@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import envConfig from '../../env.config';
 import { upvoteCommentToAPI } from '../apis';
 import { globalState } from '../states';
 import { displayNotification } from '../views';
-
-const WEB_SOCKET_URL = envConfig.env.WEB_SOCKET_URL;
 
 const Upvote = ({ commentId, upvotes: originalUpvotes }) => {
   const [upvotes, setUpvotes] = useState(originalUpvotes);
@@ -27,7 +24,7 @@ const Upvote = ({ commentId, upvotes: originalUpvotes }) => {
   };
 
   useEffect(() => {
-    const socket = io(envConfig.env.WEB_SOCKET_URL);
+    const socket = io(process.env.WEB_SOCKET_URL);
 
     socket.on('connnection', () => {
       console.log('connected to server');
