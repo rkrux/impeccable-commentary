@@ -5,6 +5,8 @@ import { upvoteCommentToAPI } from '../apis';
 import { globalState } from '../states';
 import { displayNotification } from '../views';
 
+const WEB_SOCKET_URL = envConfig.env.WEB_SOCKET_URL;
+
 const Upvote = ({ commentId, upvotes: originalUpvotes }) => {
   const [upvotes, setUpvotes] = useState(originalUpvotes);
   const [loading, setLoading] = useState(false);

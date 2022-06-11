@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "webpack serve",
     "build": "webpack",
+    "heroku-postbuild": "webpack -p",
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -33,6 +35,7 @@
   "dependencies": {
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "socket.io-client": "^4.5.1"
+    "socket.io-client": "^4.5.1",
+    "express": "^4.18.1"
   }
 }
