@@ -25,6 +25,9 @@ const knexConfig = {
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       charset: 'utf8',
+      ssl: {
+        rejectUnauthorized: false,
+      },
     },
     pool: {
       min: 2,
