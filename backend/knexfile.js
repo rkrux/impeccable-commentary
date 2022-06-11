@@ -20,11 +20,7 @@ const knexConfig = {
   production: {
     client: 'pg',
     connection: {
-      host: process.env.DB_URL,
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      charset: 'utf8',
+      connectionString: process.env.DATABASE_URL,
       ssl: {
         rejectUnauthorized: false,
       },
