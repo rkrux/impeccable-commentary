@@ -18,7 +18,7 @@ const knexConfig = {
     },
   },
   production: {
-    client: 'postgresql',
+    client: 'pg',
     connection: {
       host: process.env.DB_URL,
       database: process.env.DB_NAME,
