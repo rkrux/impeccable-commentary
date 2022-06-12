@@ -18,3 +18,7 @@
 
 - npm install
 - npm run dev
+
+***
+
+A demo is [here](https://impeccable-commentary.herokuapp.com/).
