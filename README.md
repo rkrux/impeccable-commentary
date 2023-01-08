@@ -22,4 +22,5 @@
 ***
 
 A demo is [here](https://impeccable-commentary.herokuapp.com/).
-https://user-images.githubusercontent.com/5960750/172614173-52b91f1b-72a3-4a0b-a520-ef8f8b3821b0.mov
+
+![demo](https://user-images.githubusercontent.com/5960750/172614173-52b91f1b-72a3-4a0b-a520-ef8f8b3821b0.mov)
